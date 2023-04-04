@@ -5,7 +5,6 @@ from rest_framework import generics
 from utulisateurs.serializers import  PatientSerializer
 from utulisateurs.EmailBackend import *
 from utulisateurs.models import *
-from django.core import serializers
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 User = get_user_model()

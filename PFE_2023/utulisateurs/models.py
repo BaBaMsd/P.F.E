@@ -65,14 +65,6 @@ class TypeVaccination(models.Model):
     nom = models.CharField(max_length=50)
     categorie = models.CharField(choices=CATEGORIE, max_length=50)
 
-'''class Vaccine(models.Model):
-    nom = models.CharField(max_length=100)
-    type = models.OneToOneField(TypeVaccination, on_delete=models.CASCADE)
-    fabricant = models.CharField(max_length=50)
-    doses_administrées = models.IntegerField()
-    total_doses = models.IntegerField()
-    
-'''
 class Vaccine(models.Model):
     nom = models.CharField(max_length=100)
     total_doses = models.IntegerField()
