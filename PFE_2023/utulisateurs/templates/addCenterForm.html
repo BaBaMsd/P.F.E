@@ -1,0 +1,45 @@
+{% extends "main_app/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block content %}
+
+<div class="container ">
+    <div class="row">
+        <div class="col-sm-6">
+            <h1>Nouveau center</h1>
+            <form method=POST>
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-outline-info mb-4">Bimsilah</button>
+            </form> 
+        </div>
+        <div id="mapid" style="height: 500px;" class="col-md-6 my-4"></div><br>
+
+    </div>
+
+</div>
+{% block custom_js %}
+
+<script>
+    var mymap = L.map('mapid').setView([20.2606, -10.3631], 6);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+    }).addTo(mymap);
+
+    var marker = L.marker([20.2606, -10.3631], {
+        draggable: true
+    }).addTo(mymap);
+
+    marker.on('dragend', function(event) {
+        var position = marker.getLatLng();
+        document.getElementById('lat').value = position.lat;
+        document.getElementById('lon').value = position.lng;
+    });
+</script>
+
+{% endblock custom_js %}
+
+
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>User Dashboard</h1>
+    <canvas id="user-chart"></canvas>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <script type="text/javascript">
+        var ctx = document.getElementById('user-chart').getContext('2d');
+        var users = "{{ users }}";
+        var data = {
+            labels: ['Active', 'Inactive'],
+            datasets: [{
+                label: 'User Status',
+                data: [users.filter(user => user.is_active).length, users.filter(user => !user.is_active).length],
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 99, 132, 0.2)',
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                ],
+                borderWidth: 1
+            }]
+        };
+        var options = {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        };
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: options
+        });
+    </script>
+{% endblock %}

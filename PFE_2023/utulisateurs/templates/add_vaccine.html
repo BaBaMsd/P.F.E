@@ -1,0 +1,33 @@
+{% extends "main_app/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container">
+    {% if vaccine_form %}
+    <form method="POST">
+        {% csrf_token %}
+        {{ vaccine_form.as_p }}
+        <button class="btn btn-outline-info" type="submit">Ajouter vaccine</button>
+    </form>
+    {% elif formset %}
+        <form method="post">
+            {% csrf_token %}
+            {{ formset.management_form }}
+           
+                {% for form in formset %}
+                <tr>
+                    <p>durée du dose numéro: {{ forloop.counter }}</p>
+                    <td>{{ form.as_p }}</td>
+                
+                </tr>
+                {% endfor %}
+            </table>
+            <button class="btn btn-outline-info" type="submit">Enregistrer</button>
+        </form>
+        {% else %}
+        <p>HHHHHHHHHHHHHHHh</p>
+    {% endif %}
+       
+</div>
+{% endblock %}
+
+</form>
