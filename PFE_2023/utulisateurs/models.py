@@ -28,6 +28,7 @@ class User(AbstractUser, PermissionsMixin):
 class Wilaya(models.Model):
     nom = models.CharField(max_length=50)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    
     def __str__(self):
         return self.nom
 
@@ -44,6 +45,9 @@ class CentreDeVaccination(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
 
+    def __str__(self):
+        return self.nom
+
 class AdminCenter(models.Model):
     TYPE = (
         ('admin', 'Admin'),
@@ -53,6 +57,9 @@ class AdminCenter(models.Model):
     center = models.OneToOneField(CentreDeVaccination, on_delete=models.CASCADE)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     type = models.CharField(choices=TYPE,max_length=15,default='admin')
+
+    def __str__(self):
+        return f'{self.center.nom} {self.type}'
 
 class TypeVaccination(models.Model):
     CATEGORIE = (
@@ -65,6 +72,10 @@ class TypeVaccination(models.Model):
     nom = models.CharField(max_length=50)
     categorie = models.CharField(choices=CATEGORIE, max_length=50)
 
+    def __str__(self):
+        return self.nom
+    
+
 class Vaccine(models.Model):
     nom = models.CharField(max_length=100)
     total_doses = models.IntegerField()
@@ -72,10 +83,70 @@ class Vaccine(models.Model):
     fabricant = models.CharField(max_length=50)
     doses_administrées = models.IntegerField()
 
+    def __str__(self):
+        return self.nom
+
 
 class Dose(models.Model):
     vaccine = models.ForeignKey(Vaccine, on_delete=models.CASCADE, related_name='doses')
     number = models.IntegerField(default=1)
     durée = models.DurationField()
+    def __str__(self):
+        return f'{self.vaccine.nom} dose: {self.number}  '
+
+
+class StockVaccins(models.Model):
+    OPERATION_CHOICES = [
+        ('AJOUTER', 'Addition'),
+        ('SUPRIMER', 'Suppresion'),
+    ]
+    typeOperation = models.CharField(max_length=15, choices=OPERATION_CHOICES)
+    vaccine = models.ForeignKey(Vaccine, on_delete=models.CASCADE)
+    quantite = models.PositiveIntegerField()
+    dateExpiration = models.DateField()
+    dateOperation = models.DateTimeField(auto_now_add=True)
+    centerVaccination = models.ForeignKey(CentreDeVaccination, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.vaccine.nom} {self.centerVaccination.nom}  '
+
+
+class HistoriqueStock(models.Model):
+    OPERATION_CHOICES = [
+        ('AJOUTER', 'Addition'),
+        ('SUPRIMER', 'Suppresion'),
+    ]
+    typeOperation = models.CharField(max_length=15, choices=OPERATION_CHOICES)
+    vaccine = models.ForeignKey(Vaccine, on_delete=models.CASCADE)
+    quantite = models.PositiveIntegerField()
+    dateExpiration = models.DateField()
+    dateOperation = models.DateTimeField(auto_now_add=True)
+    centerVaccination = models.ForeignKey(CentreDeVaccination, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.vaccine.nom} {self.centerVaccination.nom}  '
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=StockVaccins)
+def create_historiqueStock(sender, instance, created, **kwargs):
+    
+    if created:
+        HistoriqueStock.objects.create(
+            typeOperation=instance.typeOperation,
+            vaccine=instance.vaccine,
+            quantite=instance.quantite,
+            dateExpiration=instance.dateExpiration,
+            dateOperation=instance.dateOperation,
+            centerVaccination=instance.centerVaccination,
+           
+        )
+
+
+
+
+
 
 
