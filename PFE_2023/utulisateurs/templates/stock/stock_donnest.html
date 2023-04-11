@@ -1,0 +1,125 @@
+{% extends 'main_app/base.html' %}
+
+{% block content %}
+
+<div class="container">
+    <h1>L'etat de stock </h1>
+    <div class="row my-5">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                        <th scope="col">N°</th>
+                        <th scope="col">Vaccine</th>
+                        <th scope="col">Quantite</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for i in stock_data %}
+                      <tr>
+                 
+                       <td>{{ forloop.counter }}</td>
+                        <td>{{ i.vaccine.nom }}</td>
+                        <td>{{ i.total_quantite }}</td>
+            
+                      </tr>
+                    {% endfor %}
+                       
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+        </div>
+        <div class="col-md-6">
+            <div class="bg-white">
+                <canvas id="myChart1" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% block custom_js %}
+<!-- Inclure la bibliothèque Chart.js -->
+
+
+<!-- Script pour créer le graphique -->
+<script>
+    // Récupérer les données de stock passées par la vue Django
+    // Créer le graphique à l'aide de Chart.js
+    const ctx = document.getElementById('myChart1').getContext('2d');
+    var myChart1 = new Chart(ctx, {
+    type: 'bar',
+    data: {
+    labels: [{% for i in stock_data %} '{{ i.vaccine }}', {% endfor %}],
+    datasets: [{
+    label: 'Quantite Disponible',
+    data: [{% for i in stock_data %} {{ i.total_quantite }}, {% endfor %}],
+    backgroundColor: [
+        '#FF6384', '#36A2EB', '#FFCE56', '#2ecc71', '#e74c3c', '#3498db', '#9b59b6', '#34495e'],
+    borderColor: [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)'
+    ],
+    borderWidth: 1
+    }]
+    },
+    options: {
+    scales: {
+    yAxes: [{
+    ticks: {
+    beginAtZero: true
+        }
+    }]
+    }
+    }
+    });
+
+    const ctx1 = document.getElementById('myChart').getContext('2d');
+    var myChart = new Chart(ctx1, {
+    type: 'bar',
+    data: {
+    labels: [{% for i in stock_data%} '{{ i.vaccine.nom }}', {% endfor %}],
+    datasets: [{
+    label: 'Vaccines',
+    data: [{% for i in stock_data %} {{ i.total_quantite }}, {% endfor %}],
+    backgroundColor: [
+        '#FF6384', '#36A2EB', '#FFCE56', '#2ecc71', '#e74c3c', '#3498db', '#9b59b6', '#34495e'],
+    borderColor: [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)'
+    ],
+    borderWidth: 1
+    }]
+    },
+    options: {
+    scales: {
+    yAxes: [{
+    ticks: {
+    beginAtZero: true
+        }
+    }]
+    }
+    }
+    });
+
+</script>
+<script>
+    
+    
+</script>
+
+{% endblock custom_js %}
+{% endblock %}

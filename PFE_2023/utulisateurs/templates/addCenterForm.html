@@ -9,7 +9,7 @@
             <h1>Nouveau center</h1>
             <form method=POST>
                 {% csrf_token %}
-                {{ form|crispy }}
+                {{ form.as_p }}
                 <button type="submit" class="btn btn-outline-info mb-4">Bimsilah</button>
             </form> 
         </div>

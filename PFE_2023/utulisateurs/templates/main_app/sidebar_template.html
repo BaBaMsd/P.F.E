@@ -11,6 +11,7 @@
     <div class="sidebar">
         <!-- Sidebar user panel (optional) -->
        
+        {% if request.user.role == 'directeur-regional'%}
 
         <!-- Sidebar Menu -->
         <nav class="mt-2">
@@ -82,9 +83,88 @@
                     </ul>
                 </li>
 
+        {% elif request.user.role == 'responsable-center' %}
+
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                <li class="nav-item">
+                    <a href="{% url 'accueil' %}" class="nav-link">
+                        <i class="nav-icon fas fa-home"></i>
+                        <p>
+                            Accueil
+
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    
+                    <a href="{% url 'profile' %}"
+                        class="nav-link {% if admin_view_profile == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-address-card"></i>
+                        <p>
+                            Profile
+
+                        </p>
+                    </a>
+                </li>
+                
+
+
+                <li class="nav-item">
+                    <a href="{% url 'liste_vaccine' %}" class="nav-link">
+
+                        <i class="fa-duotone fa-syringe"></i> 
+                        <p>
+                            Vaccines
+                        </p>
+                    </a>
+                </li>
+
+
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-book"></i>
+                        <p>
+                            Stock
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{% url 'stockAddition' %}"
+                                class="nav-link ">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>
+                                    Administration
+                                </p>
+                            </a>
+                        </li>
+                        <li class="#">
+                            <a href="{% url 'stock_center' %}"
+                                class="nav-link ">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>
+                                    Consultations
+
+                                </p>
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-user-plus"></i>
+                        <p>
+                            Nouveau-Emp
+
+                        </p>
+                    </a>
+                </li>
 
 
 
+        {% else %}
 
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
@@ -255,6 +335,7 @@
                 </li>
             </li>
         </ul>
+        {% endif %}
     </nav>
 </div>
 </aside>

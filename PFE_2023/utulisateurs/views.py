@@ -1,60 +1,17 @@
 from django.shortcuts import render
-from rest_framework import permissions
-from rest_framework.response import Response
-from rest_framework import generics
-from .serializers import  PatientSerializer
 from .EmailBackend import *
 from .models import *
-from django.core import serializers
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 User = get_user_model()
 from django.contrib.auth import  login as Login_process, logout 
 from django.contrib import messages
 from .forms import *
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, get_object_or_404, redirect
 
-# Create your views here.
-
-
-'''class PatientRegisterView(generics.CreateAPIView):   
-    model = get_user_model()
-    serializer_class = PatientSerializer
-    permission_classes = [
-        permissions.AllowAny
-    ]
-    
-    def create(self, request, *args, **kwargs):
-        super().create(request, *args, **kwargs)
-        return Response(status= Response.status_code)
-
-
-
-
-def login(request):
-    if request.method == 'POST':
-        user = EmailBackend.authenticate(request, username=request.POST.get('username'), password=request.POST.get('password'))
-
-        if user is not None:
-            Login_process(request, user)
-            return redirect('accueil')
-        else:
-            messages.error(request, 'email ou mot pass invalid ')
-            print("po")
-            return redirect('login')
-    form = CustomLoginForm()
-    return render(request, 'registration/login.html' , {'form' : form})
-
-def register(request):
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('login')
-    else:
-        form = CustomUserCreationForm()
-
-    return render(request, 'registration/register.html', {'form': form})
-'''
+@login_required
+@user_passes_test(lambda u: u.role == 'directeur-regional')
 def addCenterForm(request):
     if request.method == 'POST':
         form = AddCenterForm(request.POST)
@@ -71,6 +28,7 @@ def accueil(request):
 
     return render(request, 'accueil.html')
 
+@login_required
 def liste_vaccine(request):
 
     vaccine = Vaccine.objects.all()
@@ -84,6 +42,7 @@ from .forms import VaccineForm , DoseForm, DoseFormSet
 from .models import Dose, Vaccine
 from .models import Vaccine, Dose
 
+@login_required
 def add_vaccine(request):
     DoseFormSet = forms.inlineformset_factory(Vaccine, Dose, form=DoseForm, extra=0, min_num=1)
     if request.method == 'POST':
@@ -117,3 +76,37 @@ def add_vaccine(request):
         #'formset': formset,
     }
     return render(request, 'add_vaccine.html', context)
+
+#<----------------stock--------------------->#
+@login_required
+@user_passes_test(lambda u: u.role == 'responsable-center')
+def stockAddition(request):
+    if request.method == 'POST':
+        form = StockForm(request.POST)
+        if form.is_valid():
+            form.save(commit=False,request=request)
+            return redirect('login')
+    else:
+        form = StockForm()
+
+    return render(request, 'stock/stockage.html', {'stockf': form})
+
+from django.shortcuts import render
+import matplotlib.pyplot as plt
+from django.db.models import Sum
+
+@login_required
+@user_passes_test(lambda u: u.role == 'responsable-center')
+def stock_center(request):
+    centerAdmin = AdminCenter.objects.get(user=request.user)
+    center = CentreDeVaccination.objects.get(id=centerAdmin.center.id)
+
+    stock_data = StockVaccins.objects.filter(centerVaccination=center).values('vaccine').annotate(total_quantite=Sum('quantite'))
+    #stock_data = StockVaccins.objects.all()
+
+    context = {"stock_data": stock_data,'center': center}
+
+    # Rendre le template avec le contexte
+    return render(request, "stock/stock_donnest.html", context)
+
+   

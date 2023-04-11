@@ -7,7 +7,7 @@
             {% csrf_token %}
             <fieldset class="form-group">
                 <img src="{% static 'OIP.jpg' %}" alt="logoVaccin" style="margin-left: 150px;" />
-                {{ form|crispy }}
+                {{ form.as_p }}
             </fieldset>
             <div class="form-group">
                 <button class="btn btn-outline-info" type="submit">Connecter</button>

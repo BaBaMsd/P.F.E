@@ -1,0 +1,12 @@
+{% extends "main_app/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block content %}
+    <div class="container">
+        <form method="POST">
+            {% csrf_token %}
+            {{ stockf.as_p }}
+            <button class="btn btn-outline-info" type="submit">Ajouter</button>
+        </form>
+    </div>
+{% endblock %}

@@ -1,9 +1,9 @@
-{% extends "base.html" %}
+{% extends "main_app/base.html" %}
 {% block content %}
-    <h2>You have been logged out</h2>
+    <h2>vous avez bien deconnecter</h2>
     <div class="border-top pt-3">
         <small class="text-muted">
-            <a href="{% url 'login' %}">Log In Again</a>
+            <a href="{% url 'login' %}">Connecter</a>
         </small>
     </div>
 {% endblock content %}
