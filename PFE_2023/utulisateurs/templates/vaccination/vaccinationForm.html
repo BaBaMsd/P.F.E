@@ -1,0 +1,19 @@
+{% extends "main_app/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block content %}
+
+<div class="container ">
+            <h3>Vaccination</h3>
+            <form method=POST>
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-outline-info mb-4">Effectuer</button>
+            </form> 
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

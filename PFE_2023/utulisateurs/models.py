@@ -4,8 +4,12 @@ from utulisateurs.manager import UserManager
 # Create your models here.
 from django.contrib.auth.models import User
 import random
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save , pre_save
 from django.dispatch import receiver
+import  qrcode
+from PIL import Image, ImageDraw
+from io import BytesIO
+from django.core.files import File
 
 
 class User(AbstractUser, PermissionsMixin):
@@ -13,6 +17,8 @@ class User(AbstractUser, PermissionsMixin):
         ('directeur-regional', 'Directeur-Regional'),
         ('responsable-center', 'Responsable-Center'),
         ('patient', 'Patient'),
+        ('professionnel','Professionnel'),
+        ('gerent-stock','Gerent-Stock')
     )
     num = random.random()
     username = None
@@ -34,11 +40,12 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.ImageField(default='default.jpg', upload_to='profile_pics')
 
-    def __str__(self):
+    def _str_(self):
         return f'{self.user.email} Profile'
 
-    def save(self):
-        super().save()
+    def save(self, *args, **kwargs):
+        kwargs.setdefault('force_insert', False)
+        super().save(*args, **kwargs)
 
         img = Image.open(self.image.path)
 
@@ -52,11 +59,6 @@ class Profile(models.Model):
 def create_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
-
-
-'''@receiver(post_save, sender=User)
-def save_profile(sender, instance, **kwargs):
-    instance.profile.save()'''
 
 class Wilaya(models.Model):
     nom = models.CharField(max_length=50)
@@ -175,6 +177,58 @@ def create_historiqueStock(sender, instance, created, **kwargs):
             centerVaccination=instance.centerVaccination,
            
         )
+
+
+#--------------------vaccination---------------#
+class Patient(models.Model):
+    SEXE=[
+        ('homme','Homme'),
+        ('femme','Femme')
+    ]
+    nom = models.CharField(max_length=50)
+    prenom = models.CharField(max_length=50)
+    dateNaissance = models.DateField()
+    nni = models.BigIntegerField(unique=True)
+    sexe = models.CharField(max_length=20, choices=SEXE)
+
+
+class Vaccination(models.Model):
+    STATUS=[
+        ('en_attend','En_Attend'),
+        ('validé','Validé'),
+        ('abondant','Abondant')
+    ]
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    vaccine = models.ForeignKey(Vaccine, on_delete=models.CASCADE)
+    center = models.ForeignKey(CentreDeVaccination, on_delete=models.CASCADE)
+    dose_number = models.IntegerField(default=0)
+    dose_administré = models.IntegerField(default=1)
+    date_darnier_dose = models.DateField()
+    status = models.CharField(max_length=20,choices=STATUS, default='en_attend')
+    qr_code = models.ImageField(upload_to='vaccination_qr_codes/', blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        # Generate QR code data
+        data = f"Nom: {self.patient.nom} {self.patient.prenom}\nCenter: {self.center.nom}\nMoughataa: {self.center.moughataa}\nType vaccine: {self.vaccine.type.nom}\nVaccine: {self.vaccine.nom}\nTotal doses: {self.dose_number}\nDoses administré: {self.dose_administré}\nDate darnier dose: {self.date_darnier_dose}\nStatus: {self.status}"
+
+        # Generate QR code image
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(data)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+
+        # Save QR code image to field
+        buffer = BytesIO()
+        img.save(buffer, format='PNG')
+        self.qr_code.save(f"{self.patient.nom}-vaccination-qr-code.png", File(buffer), save=False)
+
+        super(Vaccination, self).save(*args,**kwargs)
+
+@receiver(pre_save, sender=Vaccination)
+def changeStatus(sender, instance, **kwargs):
+    if instance.dose_administré == instance.dose_number:
+        instance.status = 'validé'
+        
 
 
 

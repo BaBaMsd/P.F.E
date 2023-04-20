@@ -111,7 +111,7 @@
 
 
                 <li class="nav-item">
-                    <a href="{% url 'liste_vaccine' %}" class="nav-link">
+                    <a href="{% url 'add_vaccination' %}" class="nav-link">
 
                         <i class="fa-duotone fa-syringe"></i> 
                         <p>
@@ -153,7 +153,7 @@
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="{% url 'add_staff' %}" class="nav-link">
                         <i class="nav-icon fas fa-user-plus"></i>
                         <p>
                             Nouveau-Emp
@@ -164,7 +164,42 @@
 
 
 
-        {% else %}
+        {% elif request.user.role == 'professionnel' %}
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                <li class="nav-item">
+                    <a href="{% url 'accueil' %}" class="nav-link">
+                        <i class="nav-icon fas fa-home"></i>
+                        <p>
+                            Accueil
+
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    
+                    <a href="{% url 'profile' %}"
+                        class="nav-link {% if admin_view_profile == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-address-card"></i>
+                        <p>
+                            Profile
+
+                        </p>
+                    </a>
+                </li>
+                
+
+
+                <li class="nav-item">
+                    <a href="{% url 'add_vaccination' %}" class="nav-link">
+
+                        <i class="fa-duotone fa-syringe"></i> 
+                        <p>
+                            Vaccines
+                        </p>
+                    </a>
+                </li>
+{% else %}
 
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">

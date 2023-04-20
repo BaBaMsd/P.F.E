@@ -14,4 +14,6 @@ admin.site.register(Dose)
 admin.site.register(HistoriqueStock)
 admin.site.register(StockVaccins)
 admin.site.register(Profile)
+admin.site.register(Patient)
+admin.site.register(Vaccination)
 

@@ -109,4 +109,66 @@ def stock_center(request):
     # Rendre le template avec le contexte
     return render(request, "stock/stock_donnest.html", context)
 
-   
+
+#-------------------------------#
+# def add_vaccination(request):
+#     if request.method == 'POST':
+#         count = Vaccination.objects.count()
+#         form = VaccinationForm(request.POST)
+#         if form.is_valid():
+#             form.save(commit=False,request=request)
+#             certificat = Vaccination.objects.get(id = count+1)
+#             contex = {
+#                 'cr': certificat
+#             }
+#             return render(request, 'vaccination/certificat.html', contex)
+
+#     else:
+#         form = VaccinationForm()
+
+#     return render(request, 'vaccination/vaccinationForm.html', {'form':form})
+@login_required
+@user_passes_test(lambda u: u.role in ['responsable-center', 'professionnel'])
+def add_vaccination(request):
+    if request.method == 'POST':
+        form = VaccinationForm(request.POST)
+        
+        if form.is_valid():
+            vaccine1 = form.cleaned_data['vaccine']
+            v = Vaccine.objects.get(id=vaccine1)
+            print(v.doses_administrées)
+            admin = AdminCenter.objects.get(user=request.user)
+            center=admin.center
+            stockage = StockVaccins.objects.filter(vaccine=vaccine1,
+            centerVaccination=center,
+            dateExpiration__gte=datetime.today(),
+            quantite__gte=v.doses_administrées
+            ).order_by('dateExpiration').first()
+            stockage.quantite = stockage.quantite - v.doses_administrées
+            stockage.save()
+            messages.success(request, 'Bien effectue ')
+            form.save(commit=False,request=request)
+            certificat = Vaccination.objects.latest('id')
+            context = {
+                'cr': certificat
+            }
+            return render(request, 'vaccination/certificat.html', context)
+    else:
+        form = VaccinationForm()
+
+    return render(request, 'vaccination/vaccinationForm.html', {'form':form})
+
+#--------------------add_staff-----------------#
+@login_required
+@user_passes_test(lambda u: u.role == 'responsable-center')
+def add_staff(request):
+    if request.method == 'POST':
+        form = Add_staff(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    else:
+        form = Add_staff()
+
+    return render(request, 'registration/add_staff.html', {'form': form})
+

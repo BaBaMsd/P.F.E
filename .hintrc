@@ -8,6 +8,7 @@
     "axe/language": "off",
     "meta-viewport": "off",
     "no-inline-styles": "off",
-    "axe/text-alternatives": "off"
+    "axe/text-alternatives": "off",
+    "axe/name-role-value": "off"
   }
 }
