@@ -8,11 +8,6 @@ from django.contrib.auth.password_validation import validate_password
 
 User = get_user_model()
 
-'''class ProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Profile
-        fields = ['role', 'nni']'''
-
 class PatientSerializer(serializers.ModelSerializer):
 
     password = serializers.CharField(
@@ -75,16 +70,6 @@ class PatientSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-'''  def update(self, instance, validated_data):
-        profile_data = validated_data.pop('profile')
-        instance.phone_number = validated_data.get('phone_number', instance.phone_number)
-        instance.set_password(validated_data.get('password', instance.password))
-        instance.save()
-        profile = instance.profile
-        profile.role = profile_data.get('role', profile.role)
-        profile.nni = profile_data.get('nni', profile.nni)
-        profile.save()
-        return instance '''
 
 #---------------------exemple---------------#
 from rest_framework import serializers
@@ -97,7 +82,7 @@ class PatientRGS(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('nni','email','password','confirm_password')
+        fields = ['nni','email','password','confirm_password']
         def validate(self,data):
             if data['password']!=data['confirm_password']:
                 raise serializers.ValidationError('Mot de pass non correct.')
