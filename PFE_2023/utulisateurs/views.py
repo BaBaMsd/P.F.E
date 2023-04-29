@@ -9,24 +9,88 @@ from django.contrib import messages
 from .forms import *
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
+from .serializers import PhoneLoginSerializer
 
 @login_required
-@user_passes_test(lambda u: u.role == 'directeur-regional')
+#@user_passes_test(lambda u: u.role == 'directeur-regional')
 def addCenterForm(request):
     if request.method == 'POST':
         form = AddCenterForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('login')
+            return redirect('accueil')
 
     else:
         form = AddCenterForm()
 
     return render(request, 'addCenterForm.html', {'form': form})
-
+from django.db.models import Count
 def accueil(request):
+    vaccinations = Vaccination.objects.all()
 
-    return render(request, 'accueil.html')
+    # Compter les vaccinations par état
+    status_counts = {}
+    for vaccination in vaccinations:
+        if vaccination.status in status_counts:
+            status_counts[vaccination.status] += 1
+        else:
+            status_counts[vaccination.status] = 1
+    # compte le vaccination par centres
+    centre_counts = {}
+    for vaccination in vaccinations:
+        if vaccination.center in centre_counts:
+            centre_counts[vaccination.center] += 1
+        else:
+            centre_counts[vaccination.center] = 1
+
+    # Compter les vaccinations par type de vaccin
+    vaccine_counts = {}
+    for vaccination in vaccinations:
+        if vaccination.vaccine.nom in vaccine_counts:
+            vaccine_counts[vaccination.vaccine.nom] += 1
+        else:
+            vaccine_counts[vaccination.vaccine.nom] = 1
+
+    # Compter les vaccinations par moughataa
+    vaccinations_by_moughataa = {}
+    for vaccination in vaccinations:
+        if vaccination.center.moughataa in vaccinations_by_moughataa:
+            vaccinations_by_moughataa[vaccination.center.moughataa] += 1
+        else:
+            vaccinations_by_moughataa[vaccination.center.moughataa] = 1
+
+    # Compter les vaccinations par wilaya
+    wilaya_counts = {}
+    for vaccination in vaccinations:
+        if vaccination.center.moughataa.wilaya in wilaya_counts:
+            wilaya_counts[vaccination.center.moughataa.wilaya] += 1
+        else:
+            wilaya_counts[vaccination.center.moughataa.wilaya] = 1
+
+    # Créer des listes pour les données des graphiques
+    status_labels = list(status_counts.keys())
+    status_values = list(status_counts.values())
+    vaccine_labels = list(vaccine_counts.keys())
+    vaccine_values = list(vaccine_counts.values())
+
+    # Passer les données aux templates
+    context = {
+        'status_counts': status_counts,
+        'vaccine_counts': vaccine_counts,
+        'vaccinations_by_moughataa': vaccinations_by_moughataa,
+        'wilaya_counts': wilaya_counts,
+        'status_labels': status_labels,
+        'status_values': status_values,
+        'vaccine_labels': vaccine_labels,
+        'vaccine_values': vaccine_values,
+        'centre_counts': centre_counts,
+    }
+
+    return render(request, 'accueil.html',context)
+
+def centres(request):
+    centres = CentreDeVaccination.objects.all()
+    return render(request, 'centres.html',{'centres': centres})
 
 @login_required
 def liste_vaccine(request):
@@ -79,7 +143,7 @@ def add_vaccine(request):
 
 #<----------------stock--------------------->#
 @login_required
-@user_passes_test(lambda u: u.role == 'responsable-center')
+@user_passes_test(lambda u: u.role in ['responsable-center', 'gerent-stock'])
 def stockAddition(request):
     if request.method == 'POST':
         form = StockForm(request.POST)
@@ -96,7 +160,7 @@ import matplotlib.pyplot as plt
 from django.db.models import Sum
 
 @login_required
-@user_passes_test(lambda u: u.role == 'responsable-center')
+@user_passes_test(lambda u: u.role in ['responsable-center', 'gerent-stock'])
 def stock_center(request):
     centerAdmin = AdminCenter.objects.get(user=request.user)
     center = CentreDeVaccination.objects.get(id=centerAdmin.center.id)
@@ -146,7 +210,6 @@ def add_vaccination(request):
             ).order_by('dateExpiration').first()
             stockage.quantite = stockage.quantite - v.doses_administrées
             stockage.save()
-            messages.success(request, 'Bien effectue ')
             form.save(commit=False,request=request)
             certificat = Vaccination.objects.latest('id')
             context = {
@@ -158,6 +221,32 @@ def add_vaccination(request):
 
     return render(request, 'vaccination/vaccinationForm.html', {'form':form})
 
+
+def vaccination_complementaire(request):
+    if request.method == 'POST':
+        form = Complemantaire_V(request.POST)
+        if form.is_valid():
+            nni = form.cleaned_data['nni']
+            patien = Patient.objects.get(nni=nni)
+            certificats = Vaccination.objects.get(patient=patien)
+            admin = AdminCenter.objects.get(user=request.user)
+            center=admin.center
+            certificats.dose_administré += 1
+            certificats.date_darnier_dose = datetime.today()
+            certificats.center=center
+            certificats.save()
+            context = {
+                    'cr': certificats
+                }
+            return render(request, 'vaccination/certificat.html', context)
+        else:
+            return redirect('vaccination_complementaire')
+    else:
+        form = Complemantaire_V()
+        return render(request, 'vaccination/vaccination_C.html', {'form':form})
+
+
+
 #--------------------add_staff-----------------#
 @login_required
 @user_passes_test(lambda u: u.role == 'responsable-center')
@@ -165,10 +254,11 @@ def add_staff(request):
     if request.method == 'POST':
         form = Add_staff(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('login')
+            form.save(commit=False,request=request)
+            return redirect('add_staff')
     else:
         form = Add_staff()
 
     return render(request, 'registration/add_staff.html', {'form': form})
 
+#======------------tst-------======$#

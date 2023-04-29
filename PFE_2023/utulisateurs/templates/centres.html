@@ -1,0 +1,40 @@
+{% extends 'main_app/base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+          <div class="col-md-6">
+            <h2 class="text-center">Carte des centres de vaccination</h2>
+            <div id="mapid" style="height: 400px;"></div>
+          </div>
+          <div class="col-md-6">
+            <h2 class="text-center">Liste des centres de vaccination</h2>
+            <ul class="list-group">
+              {% for centre in centres %}
+                <li class="list-group-item">
+                  <h4>{{ centre.nom }}</h4>
+                  <p>{{ centre.moughataa.wilaya }}</p>
+                  <p>{{ centre.moughataa.nom }}</p>
+                </li>
+              {% empty %}
+                <li>Aucun centre de vaccination trouvé</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+      {% block custom_js %}
+      <script>
+       var map = L.map('mapid').setView([20.2606, -10.3631], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+    
+        {% for centre in centres %}
+          L.marker([{{ centre.latitude }}, {{ centre.longitude }}]).addTo(map)
+            .bindPopup("<b>{{ centre.nom }}</b><br>{{ centre.moughataa.wilaya }}<br>{{ centre.moughataa }}");
+        {% endfor %}
+      </script>
+      {% endblock custom_js %}
+    
+{% endblock %}

@@ -1,5 +1,152 @@
 {% extends 'main_app/base.html' %}
 
 {% block content %}
-    <h1>Mahaben {{ request.user }}</h1>
+<div class="container">
+    <h1>Statistiques de vaccination</h1>
+  
+    <!-- Graphique des vaccinations par état -->
+    <div class="row">
+      <div class="col-md-6">
+        <h5>Vaccination par status des patient</h5>
+        <canvas id="etatChart"></canvas>
+        <br>
+        <ul class="collection">
+            {% for status, count in status_counts.items %}
+            <li class="collection-item">
+              {{ status }}: {{ count }}
+            </li>
+            {% endfor %}
+          </ul>
+      </div>
+  
+    <!-- Graphique des vaccinations par type de vaccin -->
+      <div class="col-md-6">
+        <h5>Les vaccines utilises</h5>
+        <canvas id="vaccineChart"></canvas>
+        <br>
+        <ul class="collection">
+            {% for vaccine, count in vaccine_counts.items %}
+            <li class="collection-item">
+              {{ vaccine }}: {{ count }}
+            </li>
+            {% endfor %}
+          </ul>
+      </div>
+    </div>
+    <hr> 
+    <br> 
+    <div class="row">
+      
+    <!-- Tableau des vaccinations par wilaya -->
+    <div class="col-md-4">
+        <h5>Vaccinations par Wilaya</h5>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Wilaya</th>
+              <th>Nombre de vaccinations</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for wilaya, count in wilaya_counts.items %}
+            <tr>
+              <td>{{ wilaya }}</td>
+              <td>   {{ count }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+        <div class="col-md-4">
+    <!-- Tableau des vaccinations par moughataa -->
+    <h5>Vaccinations par Centre</h5>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Moughataa</th>
+          <th>Nombre de vaccinations</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for centre, count in vaccinations_by_moughataa.items %}
+        <tr>
+          <td>{{ centre.nom }}</td>
+          <td>{{ count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+</div>
+
+<div class="col-md-4">
+    <h5>Vaccinations par Centre</h5>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Centre</th>
+          <th>Nombre de vaccinations</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for centre, count in centre_counts.items %}
+        <tr>
+          <td>{{ centre.nom}}</td>
+          <td>   {{ count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+</div>
+</div>
+  </div>
+
+{% block custom_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+<script>
+    var etatData = {
+      labels: {{ status_labels|safe }},
+      datasets: [{
+        label: 'Vaccinations par état',
+        data: {{ status_values|safe }},
+        backgroundColor: [
+          '#3e95cd',
+          '#8e5ea2',
+          '#3cba9f',
+          '#e8c3b9',
+          '#c45850',
+          '#fcd2a8',
+          '#faebd7'
+        ],
+      }]
+    };
+  
+    var vaccineData = {
+      labels: {{ vaccine_labels|safe }},
+      datasets: [{
+        label: 'Vaccinations par type de vaccin',
+        data: {{ vaccine_values|safe }},
+        backgroundColor: [
+          '#3e95cd',
+          '#8e5ea2',
+          '#3cba9f',
+          '#e8c3b9',
+          '#c45850',
+          '#fcd2a8',
+          '#faebd7'
+        ],
+      }]
+    };
+  
+    var etatChart = new Chart(document.getElementById("etatChart"), {
+      type: 'pie',
+      data: etatData,
+    });
+  
+    var vaccineChart = new Chart(document.getElementById("vaccineChart"), {
+      type: 'pie',
+      data: vaccineData,
+    });
+  </script>
+{% endblock custom_js %}
+    
 {% endblock %}

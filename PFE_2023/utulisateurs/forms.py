@@ -12,7 +12,7 @@ from datetime import datetime
 
 #_formilair_aithentification
 class CustomLoginForm(forms.Form):
-    email = forms.CharField(widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6 my-2'}))
+    email = forms.CharField(label='Email ou Telephone',widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6 my-2'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control col-6 my-2'}))
 
 #_formilaire_registrations
@@ -37,11 +37,11 @@ class CustomUserCreationForm(forms.Form):
 class UserUpdateForm(forms.ModelForm):
     first_name = forms.CharField(label='Nom', widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6 my-2'}))
     last_name = forms.CharField(label='Prénom',widget=forms.TextInput(attrs={'class':'form-control col-6 my-2'}))
-
+    nni = forms.CharField(label='NNI',widget=forms.TextInput(attrs={'class':'form-control col-6 my-2'}))
 
     class Meta:
         model = User
-        fields = [ 'first_name', 'last_name']
+        fields = [ 'nni','first_name', 'last_name']
 
 
 class ProfileUpdateForm(forms.ModelForm):
@@ -52,11 +52,23 @@ class ProfileUpdateForm(forms.ModelForm):
 #<------------------Gestion-des-centers--------------->#
 
 #_ajouter_un_center
+from django.core.validators import RegexValidator
+phone_regex = RegexValidator(
+    #r'^\+?1?\d{9,15}$'
+    regex=r'^(\+2222|\+2223|\+2224|002222|002223|002224|2|3|4)[0-9]{7}$',  # Format international avec ou sans le préfixe '+'
+    message="Le numéro de téléphone doit être dans un format valide."
+)
+ 
 class AddCenterForm(forms.Form):
-    nom = forms.CharField(max_length=50, widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))
-    moughataa = forms.ChoiceField(choices=[(i.pk, i.nom) for i in Moughataa.objects.all()], widget=forms.Select(attrs={'class':'form-control col-6 '}))
+    centre_nom = forms.CharField(max_length=50, widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'})) 
+    centre_moughataa = forms.ChoiceField(choices=[(i.pk, i.nom) for i in Moughataa.objects.all()], widget=forms.Select(attrs={'class':'form-control col-6 '}))
     admin_nom = forms.CharField(max_length=30, widget= forms.TextInput(attrs={'class':'form-control col-6'}))
     admin_email = forms.EmailField(widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))
+    phone_number = forms.CharField(
+        label="Numéro de téléphone",
+        validators=[phone_regex],
+         widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}
+         ))
     latitude = forms.DecimalField(widget=forms.TextInput(attrs={
         'id': 'lat',
         'class':'form-control input-group mb-3 col-6'
@@ -74,13 +86,14 @@ class AddCenterForm(forms.Form):
         user = User.objects.create_user(
             first_name=self.cleaned_data['admin_nom'],
             email=self.cleaned_data['admin_email'],
+            phone_number=self.cleaned_data['phone_number'],
             password=self.password,
             role=self.role
         )
         # Create a new center
         center = CentreDeVaccination.objects.create(
-            nom=self.cleaned_data['nom'],
-            moughataa=Moughataa.objects.get(id=self.cleaned_data['moughataa']),
+            nom=self.cleaned_data['centre_nom'],
+            moughataa=Moughataa.objects.get(id=self.cleaned_data['centre_moughataa']),
             latitude=self.cleaned_data['latitude'],
             longitude=self.cleaned_data['longitude'],
         )
@@ -195,16 +208,31 @@ class Add_staff(forms.Form):
         ('professionnel','Professionnel'),
         ('gerent-stock','Gerent-Stock'),
     )
- 
+    phone_number = forms.CharField(
+        label="Numéro de téléphone",
+        validators=[phone_regex],
+         widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}
+         ))
     email = forms.CharField(widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6 my-2'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control col-6 my-2'}))
     role = forms.ChoiceField(choices=ROLES, widget=forms.Select(attrs={'class':'form-control col-4 my-2'}))
 
-    def save(self):
+    def save(self, commit=True, request=None):
+        user= request.user if request else None
+        center = AdminCenter.objects.get(user=user)
         # Create a new user
         user = User.objects.create_user(
             email=self.cleaned_data['email'],
+            phone_number=self.cleaned_data['phone_number'],
             password=self.cleaned_data['password'],
             role=self.cleaned_data['role'],
-    )
+        )
 
+        admin_center = AdminCenter.objects.create(user=user, center=center.center)
+
+class Complemantaire_V(forms.Form):
+    nni = forms.CharField(label='NNI',widget=forms.TextInput(attrs={'class':'form-control col-6 my-2','name':'nni'}))
+
+    class Meta:
+        model = Patient
+        fields = [ 'nni']

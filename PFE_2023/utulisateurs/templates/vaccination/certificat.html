@@ -27,7 +27,7 @@
                         <li class="list-group-item"><b>Dose administré: </b>{{ cr.dose_administré}}</li>
                         <li class="list-group-item"><b>Date Prise: </b>{{ cr.date_darnier_dose|date:"d/m/Y"}}</li>
                         <li class="list-group-item"><b>Status: </b>{{ cr.status}}</li>
-                        <li class="list-group-item"><center><img src="{{ cr.qr_code.url}}" width="200" height="200"></center></li>
+                        <li class="list-group-item"><img src="{{ cr.qr_code.url}}" width="200" height="200"></li>
 
                     </ul>
                     

@@ -20,14 +20,17 @@ class User(AbstractUser, PermissionsMixin):
         ('professionnel','Professionnel'),
         ('gerent-stock','Gerent-Stock')
     )
-    num = random.random()
+    phone_number = models.CharField(max_length=20, unique=True, null=True)
     username = None
     email = models.EmailField(unique=True)
     role = models.CharField(choices=ROLES, max_length=20, default='patient')
-    nni = models.CharField(max_length=20,default=num)
+    nni = models.CharField(max_length=20,default='')
 
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    # USERNAME_FIELD = "email"
+    # REQUIRED_FIELDS = []
+    USERNAME_FIELD = 'email'
+    EMAIL_FIELD = 'email'
+    REQUIRED_FIELDS = ['phone_number']
     
     objects = UserManager()
     def __str__(self):
@@ -89,7 +92,7 @@ class AdminCenter(models.Model):
         ('professionnel','Professionnel'),
         ('gerent-stock','Gerent-Stock')
     )
-    center = models.OneToOneField(CentreDeVaccination, on_delete=models.CASCADE)
+    center = models.ForeignKey(CentreDeVaccination, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     type = models.CharField(choices=TYPE,max_length=15,default='admin')
 
@@ -225,9 +228,22 @@ class Vaccination(models.Model):
         super(Vaccination, self).save(*args,**kwargs)
 
 @receiver(pre_save, sender=Vaccination)
-def changeStatus(sender, instance, **kwargs):
+def changeStatus(sender, instance,*args, **kwargs):
     if instance.dose_administré == instance.dose_number:
         instance.status = 'validé'
+        data = f"Nom: {instance.patient.nom} {instance.patient.prenom}\nCenter: {instance.center.nom}\nMoughataa: {instance.center.moughataa}\nType vaccine: {instance.vaccine.type.nom}\nVaccine: {instance.vaccine.nom}\nTotal doses: {instance.dose_number}\nDoses administré: {instance.dose_administré}\nDate darnier dose: {instance.date_darnier_dose}\nStatus: {instance.status}"
+
+        # Generate QR code image
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(data)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+
+        # Save QR code image to field
+        buffer = BytesIO()
+        img.save(buffer, format='PNG')
+        instance.qr_code.save(f"{instance.patient.nom}-vaccination-qr-code.png", File(buffer), save=False)
+
         
 
 

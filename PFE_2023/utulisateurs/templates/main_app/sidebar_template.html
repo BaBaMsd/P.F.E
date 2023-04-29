@@ -4,7 +4,7 @@
     <a href="#" class="brand-link">
         <img src="{% static 'OIP.jpg' %} " alt="AdminLTE Logo"
             class="brand-image img-circle elevation-3" >
-        <span class="brand-text font-weight-light">Admin Panel</span>
+        <span class="brand-text font-weight-light">Gestion de Vaccination</span>
     </a>
 
     <!-- Sidebar -->
@@ -162,6 +162,75 @@
                     </a>
                 </li>
 
+        {% elif request.user.is_superuser %}
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                <li class="nav-item">
+                    <a href="{% url 'accueil' %}" class="nav-link">
+                        <i class="nav-icon fas fa-home"></i>
+                        <p>
+                            Accueil
+
+                        </p>
+                    </a>
+                </li>
+                
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-book"></i>
+                        <p>
+                            Centres
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{% url 'addCenterForm' %}"
+                                class="nav-link ">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>
+                                    Nouveau centre
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'centres' %}" class="nav-link">
+                                <i class="nav-icon fas fa-home"></i>
+                                <p>
+                                    Centres-liste
+        
+                                </p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    
+                    <a href="{% url 'profile' %}"
+                        class="nav-link {% if admin_view_profile == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-address-card"></i>
+                        <p>
+                            Profile
+
+                        </p>
+                    </a>
+                </li>
+                
+
+
+                <li class="nav-item">
+                    <a href="{% url 'liste_vaccine' %}" class="nav-link">
+
+                        <i class="fa-duotone fa-syringe"></i> 
+                        <p>
+                            Vaccines
+                        </p>
+                    </a>
+                </li>
+            </li>
+                    </ul>
+               
+
 
 
         {% elif request.user.role == 'professionnel' %}
@@ -187,20 +256,95 @@
                         </p>
                     </a>
                 </li>
-                
-
-
-                <li class="nav-item">
-                    <a href="{% url 'add_vaccination' %}" class="nav-link">
-
-                        <i class="fa-duotone fa-syringe"></i> 
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-book"></i>
                         <p>
-                            Vaccines
+                            Vaccination
+                            <i class="fas fa-angle-left right"></i>
                         </p>
                     </a>
-                </li>
-{% else %}
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{% url 'add_vaccination' %}"
+                                class="nav-link ">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>
+                                    Nouvelle
+                                </p>
+                            </a>
+                        </li>
+                        <li class="#">
+                            <a href="{% url 'vaccination_complementaire' %}"
+                                class="nav-link ">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>
+                                    Completrantaire
+                                </p>
+                            </a>
+                        </li>
 
+                    </ul>
+                </li>
+            {% elif request.user.role == 'gerent-stock' %}
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                    <li class="nav-item">
+                        <a href="{% url 'accueil' %}" class="nav-link">
+                            <i class="nav-icon fas fa-home"></i>
+                            <p>
+                                Accueil
+    
+                            </p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        
+                        <a href="{% url 'profile' %}"
+                            class="nav-link {% if admin_view_profile == request.path %} active {% endif %}">
+                            <i class="nav-icon fas fa-address-card"></i>
+                            <p>
+                                Profile
+    
+                            </p>
+                        </a>
+                    </li>
+    
+    
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-book"></i>
+                            <p>
+                                Stock
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{% url 'stockAddition' %}"
+                                    class="nav-link ">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>
+                                        Administration
+                                    </p>
+                                </a>
+                            </li>
+                            <li class="#">
+                                <a href="{% url 'stock_center' %}"
+                                    class="nav-link ">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>
+                                        Consultations
+    
+                                    </p>
+                                </a>
+                            </li>
+    
+                        </ul>
+                    </li>
+    
+{% else %}
+<!-- 
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-clock"></i>
@@ -236,9 +380,9 @@
                         </li>
 
                     </ul>
-                </li>
+                </li> -->
 
-
+<!-- 
                 <li class="nav-item">
                     {% url 'add_staff' as add_staff %}
                     <a href="{{add_staff}}" class="nav-link {% if add_staff == request.path %} active {% endif %}">
@@ -369,7 +513,7 @@
                     </a>
                 </li>
             </li>
-        </ul>
+        </ul> -->
         {% endif %}
     </nav>
 </div>
