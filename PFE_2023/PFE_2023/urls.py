@@ -5,13 +5,14 @@ from django.conf import settings
 from django.conf.urls.static import static
 from utulisateurs.views import *
 from utulisateurs.Contrller import auth
+from utulisateurs.RestApi import api
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('add_staff/', add_staff, name='add_staff'),
-    path('patient_rg/', auth.patient_rg, name='patient_rg'),
+    path('patient_rg/', api.register_patient, name='patient_rg'),
     path('register/', auth.register, name='register'),
     path('', auth.login , name='login'),
-    path('phone-login/', auth.PhoneLoginView.as_view(), name='phone_login'),
+    path('login_P/', api.PatientLoginView.as_view(), name='login_P'),
     path('profile/', auth.profile, name='profile'),
     path('vaccination_complementaire/', vaccination_complementaire, name='vaccination_complementaire'),
     path('accueil', accueil, name='accueil'),

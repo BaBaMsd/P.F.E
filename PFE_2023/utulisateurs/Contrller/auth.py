@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import generics
-from utulisateurs.serializers import  PatientSerializer, PhoneLoginSerializer 
+from utulisateurs.serializers import  PatientSerializer
 from utulisateurs.EmailBackend import EmailBackend
 from utulisateurs.models import *
 from django.shortcuts import render, redirect
@@ -29,7 +29,6 @@ class PatientRegisterView(generics.CreateAPIView):
 #--------------test--------------------#
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from utulisateurs.serializers import PatientRGS
 from utulisateurs.models import User
 
 @api_view(['GET','POST'])
@@ -111,12 +110,12 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 
 
-class PhoneLoginView(ObtainAuthToken):
-    serializer_class = PhoneLoginSerializer
+# class PhoneLoginView(ObtainAuthToken):
+#     serializer_class = PhoneLoginSerializer
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key})
+#     def post(self, request, *args, **kwargs):
+#         serializer = self.serializer_class(data=request.data, context={'request': request})
+#         serializer.is_valid(raise_exception=True)
+#         user = serializer.validated_data['user']
+#         token, created = Token.objects.get_or_create(user=user)
+#         return Response({'token': token.key})

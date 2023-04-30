@@ -9,7 +9,6 @@ from django.contrib import messages
 from .forms import *
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
-from .serializers import PhoneLoginSerializer
 
 @login_required
 #@user_passes_test(lambda u: u.role == 'directeur-regional')
