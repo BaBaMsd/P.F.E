@@ -9,7 +9,8 @@ from utulisateurs.serializers import  PatientSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 
 #--------------login-Patient----------#
@@ -45,8 +46,9 @@ class PatientLoginView(ObtainAuthToken):
 @api_view(['POST'])
 def register_patient(request):
     nni = request.data.get('nni')
+    phone_number = request.data['phone_number']
 
-    if Patient.objects.filter(nni=nni).exists() and not User.objects.filter(nni=nni).exists():
+    if Patient.objects.filter(nni=nni).exists() and not User.objects.filter(nni=nni).exists() and not User.objects.filter(phone_number=phone_number).exists():
 
         serializer = PatientSerializer(data=request.data)
         if serializer.is_valid():
@@ -57,3 +59,14 @@ def register_patient(request):
     else:
         
         return Response('ERRROR', status=400)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUserData(request,id):
+    if request.method == 'GET':
+        patient = Patient.objects.get(id=id)
+        # vaccination = Vaccination.objects.get(patient=patient)
+        return Response({
+                'id':patient.id,
+        },status=Response.status_code)
+
