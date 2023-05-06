@@ -311,3 +311,42 @@ def vaccination_type(request):
     type_vaccination = TypeVaccination.objects.all()
 
     return render(request, 'vaccination_type.html', {'type_vaccination': type_vaccination})
+
+from operator import attrgetter
+
+def sort_vaccination_stock(vaccine):
+    # Trier le stock pour cette vaccination en fonction de la date d'expiration et de la date d'ajout
+    sorted_stock = sorted(StockVaccins.vaccine_set.all(), key=attrgetter('dateExpiration', 'dateOperation'))
+    return sorted_stock
+
+from django.shortcuts import get_object_or_404, render
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+
+
+def remove_stock(request, vaccination_id):
+    vaccine = get_object_or_404(Vaccine, pk=vaccination_id)
+    stock = sort_vaccination_stock(vaccine) # Trie le stock de vaccination
+    quantite_a_supprimer = int(request.POST['quantite'])
+    
+    # Vérifie si la quantité à retirer est inférieure ou égale à la quantité disponible
+    total_disponible = sum([s.quantite for s in stock])
+    if quantite_a_supprimer > total_disponible:
+        # Si la quantité à retirer est supérieure à la quantité disponible, affiche une erreur
+        error_message = "La quantité à retirer est supérieure à la quantité disponible."
+        return redirect('/')
+       # return render(request, 'myapp/remove_stock.html', {'vaccination': vaccine, 'error_message': error_message})
+    
+    # Retire la quantité de doses de vaccin du stock
+    for s in stock:
+        if s.quantite >= quantite_a_supprimer:
+            s.quantite -= quantite_a_supprimer
+            s.save()
+            break
+        else:
+            quantite_a_supprimer -= s.quantite
+            s.quantite = 0
+            s.save()
+    messages.success(request, 'Opp ok')
+    # Redirige vers la page de détail de la vaccination
+    return HttpResponseRedirect('/')
