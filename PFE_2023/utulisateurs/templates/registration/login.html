@@ -11,10 +11,10 @@
             </fieldset>
             <div class="form-group">
                 <button class="btn btn-outline-info" type="submit">Connecter</button>
-                <small class="text-muted ml-2">
-                    <a href="#">Mot de passe oublier?</a>
-                </small>
             </div>
-        </form>
+        </form> 
     </div>
+    {% block custom_js %}
+    <script src="{% static 'js/hide-message.js' %}"></script>
+    {% endblock custom_js %}
 {% endblock content %}

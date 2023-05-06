@@ -3,21 +3,25 @@
 
 {% block content %}
 <div class="container">
-    <a href="{% url 'add_vaccine' %}" class="btn btn-outline-info my-2">Nouvelle vaccine</a>
+    
+    <a href="{% url 'add_vaccine' %}" class="btn btn-primary my-2">Nouvelle vaccine</a>
     
     <div class="row">
         {% for i in vaccine %}
-        <div class="col-sm-4">
+        <div class="col-sm-12">
         <div class="card">
-            <div class="card-header bg-white">
-                <h5><a class="article-title" href="#">{{ i.nom }}</a></h5>
+            <div class="card-header">
+                <h3><a>{{ i.nom }}</a></h3>
+            <!-- <a href="{% url 'update_vaccine' i.id %}" style="color: white;" class="btn btn-secondary">Modifier</a> -->
             </div>
+            
             <div class="card-body">
                 <ul class="list-group">
                         <li class="list-group-item">Type-Vaccination: <b>{{  i.type.nom }}</b></li>
                         <li class="list-group-item">Fabricant: <b>{{  i.fabricant}}</b></li>
                         <li class="list-group-item">Nomber doses: <b>{{ i.total_doses}}</b></li>
                         <li class="list-group-item">Dose Administrée: <b>{{ i.doses_administrées}}</b></li>
+                        <li> <a href="{% url 'supp_vaccine' i.id  %}" class="btn btn-danger list-group-item">Suprimmer</a></li>
                 </ul>
             </div>
         </div>

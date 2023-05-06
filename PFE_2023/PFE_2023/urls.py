@@ -19,16 +19,20 @@ urlpatterns = [
     path('', auth.login , name='login'),
     path('profile/', auth.profile, name='profile'),
     path('vaccination_complementaire/', vaccination_complementaire, name='vaccination_complementaire'),
-    path('accueil', accueil, name='accueil'),
-    path('centres', centres, name='centres'),
-    path('stock_center', stock_center, name='stock_center'),
+    path('accueil/', accueil, name='accueil'),
+    path('centres/', centres, name='centres'),
+    path('stock_center/', stock_center, name='stock_center'),
     path('logout/', auth_views.LogoutView.as_view(template_name='registration/logout.html'), name='logout'),
-    path('add_vaccine', add_vaccine, name='add_vaccine'),
-    path('add_vaccination', add_vaccination, name='add_vaccination'),
-    path("registerPatient/",auth.PatientRegisterView.as_view(),name = "registerPatient"), 
+    path('add_vaccine/', add_vaccine, name='add_vaccine'),
+    path('add_vaccination/', add_vaccination, name='add_vaccination'),
+    path('vaccination_type/', vaccination_type, name='vaccination_type'),
+    path("changePassMot/", auth.changePassMot,name = "changePassMot"), 
     path('liste_vaccine/', liste_vaccine, name='liste_vaccine'),
     path('addCenterForm/', addCenterForm, name='addCenterForm'),
     path('stockAddition/', stockAddition , name='stockAddition'),
+
+    path('vaccines/update/<int:id>/', update_vaccine, name='update_vaccine'),
+    path('vaccines/delete/<int:id>/', delete_vaccine, name='supp_vaccine'),
 
 ]
 

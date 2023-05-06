@@ -108,19 +108,36 @@
                     </a>
                 </li>
                 
-
-
-                <li class="nav-item">
-                    <a href="{% url 'add_vaccination' %}" class="nav-link">
-
-                        <i class="fa-duotone fa-syringe"></i> 
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-book"></i>
                         <p>
-                            Vaccines
+                            Vaccination
+                            <i class="fas fa-angle-left right"></i>
                         </p>
                     </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{% url 'add_vaccination' %}"
+                                class="nav-link ">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>
+                                    Nouvelle
+                                </p>
+                            </a>
+                        </li>
+                        <li class="#">
+                            <a href="{% url 'vaccination_complementaire' %}"
+                                class="nav-link ">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>
+                                    Completrantaire
+                                </p>
+                            </a>
+                        </li>
+
+                    </ul>
                 </li>
-
-
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-book"></i>
@@ -156,11 +173,21 @@
                     <a href="{% url 'add_staff' %}" class="nav-link">
                         <i class="nav-icon fas fa-user-plus"></i>
                         <p>
-                            Nouveau-Emp
+                            Nouveau-employée
 
                         </p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{% url 'logout' %}" class="nav-link">
+
+                        <i class="fa-duotone fa-syringe"></i> 
+                        <p>
+                            Déconnexion
+                        </p>
+                    </a>
+                </li>
+            </li>
 
         {% elif request.user.is_superuser %}
         <nav class="mt-2">
@@ -174,7 +201,17 @@
                         </p>
                     </a>
                 </li>
-                
+                <li class="nav-item">
+                    
+                    <a href="{% url 'profile' %}"
+                        class="nav-link {% if admin_view_profile == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-address-card"></i>
+                        <p>
+                            Profile
+
+                        </p>
+                    </a>
+                </li>
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-book"></i>
@@ -197,38 +234,54 @@
                             <a href="{% url 'centres' %}" class="nav-link">
                                 <i class="nav-icon fas fa-home"></i>
                                 <p>
-                                    Centres-liste
+                                    Liste-centres
         
                                 </p>
                             </a>
                         </li>
                     </ul>
                 </li>
-                <li class="nav-item">
-                    
-                    <a href="{% url 'profile' %}"
-                        class="nav-link {% if admin_view_profile == request.path %} active {% endif %}">
-                        <i class="nav-icon fas fa-address-card"></i>
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-book"></i>
                         <p>
-                            Profile
-
+                            Vaccination
+                            <i class="fas fa-angle-left right"></i>
                         </p>
                     </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{% url 'liste_vaccine' %}"
+                                class="nav-link ">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>
+                                    Liste-vaccines
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'vaccination_type' %}" class="nav-link">
+                                <i class="nav-icon fas fa-home"></i>
+                                <p>
+                                    Type-Vaccination
+        
+                                </p>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 
-
-
                 <li class="nav-item">
-                    <a href="{% url 'liste_vaccine' %}" class="nav-link">
+                    <a href="{% url 'logout' %}" class="nav-link">
 
                         <i class="fa-duotone fa-syringe"></i> 
                         <p>
-                            Vaccines
+                            Déconnexion
                         </p>
                     </a>
                 </li>
             </li>
-                    </ul>
+                </ul>
                
 
 
@@ -286,6 +339,16 @@
 
                     </ul>
                 </li>
+                <li class="nav-item">
+                    <a href="{% url 'logout' %}" class="nav-link">
+
+                        <i class="fa-duotone fa-syringe"></i> 
+                        <p>
+                            Déconnexion
+                        </p>
+                    </a>
+                </li>
+            </li>
             {% elif request.user.role == 'gerent-stock' %}
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
@@ -342,6 +405,16 @@
     
                         </ul>
                     </li>
+                    <li class="nav-item">
+                        <a href="{% url 'logout' %}" class="nav-link">
+    
+                            <i class="fa-duotone fa-syringe"></i> 
+                            <p>
+                                Déconnexion
+                            </p>
+                        </a>
+                    </li>
+                </li>
     
 {% else %}
 <!-- 

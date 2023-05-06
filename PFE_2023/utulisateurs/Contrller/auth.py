@@ -14,42 +14,6 @@ from utulisateurs.forms import *
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 
-class PatientRegisterView(generics.CreateAPIView):   
-    model = get_user_model()
-    serializer_class = PatientSerializer
-    permission_classes = [
-        permissions.AllowAny
-    ]
-    
-    def create(self, request, *args, **kwargs):
-        super().create(request, *args, **kwargs)
-        return Response(status= Response.status_code)
-
-
-#--------------test--------------------#
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from utulisateurs.models import User
-
-@api_view(['GET','POST'])
-def patient_rg(request):
-    nni=request.POST.get('nni')
-    try:
-        patien = Patient.objects.get(nni=nni)
-    except Patient.DoesNotExist:
-        return Response({'error':'NNI does not exist in the database'})
-
-
-    if request.method == 'POST':
-        request.data['nni']= patien.nni #_Ajouter
-        serializer = PatientRGS(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'success': 'Compte creer'})
-        else:
-            Response(serializer.errors)
-            return Response({'nni':user.nni,'email':user.email})
-
 #_authentifications par email
 
 def login(request):
@@ -104,18 +68,26 @@ def profile(request):
 
     return render(request, 'registration/profil.html', context)
 
-#@-------------------
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
-from rest_framework.response import Response
+    #-----------chang-mot-passe---------------#
+    
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 
+@login_required
+def changePassMot(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important!
+            messages.success(request, 'Votre mot de passe est bien modifier!')
+            return redirect('profile')
+        else:
+            messages.error(request, 'SVP, il y a une erreur il faut le corriger.')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'registration/change_password.html', {'form': form})
 
-# class PhoneLoginView(ObtainAuthToken):
-#     serializer_class = PhoneLoginSerializer
-
-#     def post(self, request, *args, **kwargs):
-#         serializer = self.serializer_class(data=request.data, context={'request': request})
-#         serializer.is_valid(raise_exception=True)
-#         user = serializer.validated_data['user']
-#         token, created = Token.objects.get_or_create(user=user)
-#         return Response({'token': token.key})

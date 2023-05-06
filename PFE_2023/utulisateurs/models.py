@@ -79,7 +79,7 @@ class Moughataa(models.Model):
 
 class CentreDeVaccination(models.Model):
     nom = models.CharField(max_length=50)
-    moughataa = models.ForeignKey('Moughataa', on_delete=models.CASCADE, default='tgnt')
+    moughataa = models.ForeignKey('Moughataa', on_delete=models.CASCADE)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
 

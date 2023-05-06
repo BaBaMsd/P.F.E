@@ -6,12 +6,12 @@ import 'package:http/http.dart' as http;
 class AuthService {
   Future<String> signIn(String phoneNumber, String password) async {
     print('object');
-    // const baseUrl = 'http://172.19.144.1:8000/';
-    const baseUrl = 'http://172.19.144.1:9000/';
+    const baseUrl = 'http://192.168.1.203:8000/';
     const endpoint = 'login_P/';
 
     final uri = Uri.parse(baseUrl + endpoint);
-
+    // const url = 'http://192.168.1.203:8000/login_P/';
+    // final uri = Uri.parse(url);
     final response = await http.post(
       uri,
       headers: {

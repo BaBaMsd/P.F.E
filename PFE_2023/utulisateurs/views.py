@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .EmailBackend import *
 from .models import *
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import get_user_model
 User = get_user_model()
 from django.contrib.auth import  login as Login_process, logout 
@@ -24,8 +24,13 @@ def addCenterForm(request):
 
     return render(request, 'addCenterForm.html', {'form': form})
 from django.db.models import Count
+from datetime import date
 def accueil(request):
-    vaccinations = Vaccination.objects.all()
+    if request.user.role == 'responsable-center' or request.user.role == 'gerent-stock' or request.user.role == 'professionnel':
+        centre = AdminCenter.objects.get(user=request.user)
+        vaccinations = Vaccination.objects.filter(center=centre.center)
+    else:
+        vaccinations = Vaccination.objects.all()
 
     # Compter les vaccinations par état
     status_counts = {}
@@ -65,6 +70,40 @@ def accueil(request):
             wilaya_counts[vaccination.center.moughataa.wilaya] += 1
         else:
             wilaya_counts[vaccination.center.moughataa.wilaya] = 1
+     # Compter les vaccinations par âge
+    age_counts = {
+        '1-18': 0,
+        '18-30': 0,
+        '30-50': 0,
+        '50+': 0
+    }
+    today = date.today()
+    for vaccination in vaccinations:
+        age = today.year - vaccination.patient.dateNaissance.year
+        if today.month < vaccination.patient.dateNaissance.month or \
+                (today.month == vaccination.patient.dateNaissance.month and today.day < vaccination.patient.dateNaissance.day):
+            age -= 1
+        if age <= 18:
+            age_counts['1-18'] += 1
+        elif age <= 30:
+            age_counts['18-30'] += 1
+        elif age <= 50:
+            age_counts['30-50'] += 1
+        else:
+            age_counts['50+'] += 1
+
+    patients = Patient.objects.all()
+    total_patient = patients.count()
+    sex_count1 = patients.values('sexe').annotate(count=Count('sexe'))
+    sex_percentages = {}
+    for sex_count in sex_count1:
+        sex_percentages[sex_count['sexe']] = round(sex_count['count'] / total_patient * 100)
+
+    sex_counts = {}
+    sex_labels = ['femme', 'homme']
+    for label in sex_labels:
+        sex_counts[label] = vaccinations.filter(patient__sexe=label).count()
+    
 
     # Créer des listes pour les données des graphiques
     status_labels = list(status_counts.keys())
@@ -83,6 +122,10 @@ def accueil(request):
         'vaccine_labels': vaccine_labels,
         'vaccine_values': vaccine_values,
         'centre_counts': centre_counts,
+        'age_counts': age_counts,
+        'sex_counts': sex_counts,
+        'sex_percentages': sex_percentages, 
+        'total_patient': total_patient
     }
 
     return render(request, 'accueil.html',context)
@@ -140,6 +183,22 @@ def add_vaccine(request):
     }
     return render(request, 'add_vaccine.html', context)
 
+def delete_vaccine(request, id):
+    vaccine = Vaccine.objects.get(id=id)
+    vaccine.delete()
+    messages.success(request, 'La vaccination a été supprimée avec succès')
+    return redirect(reverse('liste_vaccine'))
+    
+def update_vaccine(request, id):
+    vaccine = get_object_or_404(Vaccine, id=id) 
+    form = VaccineForm(request.POST or None, instance=vaccine) 
+    if form.is_valid(): 
+        form.save()
+        messages.success(request, 'La vaccination a été modifiée avec succès')
+        return redirect(reverse('vaccines_list'))
+    context = {'form': form}
+    return render(request, 'vaccine_mod_form.html', context)
+
 #<----------------stock--------------------->#
 @login_required
 @user_passes_test(lambda u: u.role in ['responsable-center', 'gerent-stock'])
@@ -148,7 +207,7 @@ def stockAddition(request):
         form = StockForm(request.POST)
         if form.is_valid():
             form.save(commit=False,request=request)
-            return redirect('login')
+            return redirect('/')
     else:
         form = StockForm()
 
@@ -172,30 +231,12 @@ def stock_center(request):
     # Rendre le template avec le contexte
     return render(request, "stock/stock_donnest.html", context)
 
-
-#-------------------------------#
-# def add_vaccination(request):
-#     if request.method == 'POST':
-#         count = Vaccination.objects.count()
-#         form = VaccinationForm(request.POST)
-#         if form.is_valid():
-#             form.save(commit=False,request=request)
-#             certificat = Vaccination.objects.get(id = count+1)
-#             contex = {
-#                 'cr': certificat
-#             }
-#             return render(request, 'vaccination/certificat.html', contex)
-
-#     else:
-#         form = VaccinationForm()
-
-#     return render(request, 'vaccination/vaccinationForm.html', {'form':form})
 @login_required
 @user_passes_test(lambda u: u.role in ['responsable-center', 'professionnel'])
 def add_vaccination(request):
+    
     if request.method == 'POST':
         form = VaccinationForm(request.POST)
-        
         if form.is_valid():
             vaccine1 = form.cleaned_data['vaccine']
             v = Vaccine.objects.get(id=vaccine1)
@@ -207,17 +248,19 @@ def add_vaccination(request):
             dateExpiration__gte=datetime.today(),
             quantite__gte=v.doses_administrées
             ).order_by('dateExpiration').first()
-            stockage.quantite = stockage.quantite - v.doses_administrées
-            stockage.save()
-            form.save(commit=False,request=request)
-            certificat = Vaccination.objects.latest('id')
-            context = {
-                'cr': certificat
-            }
-            return render(request, 'vaccination/certificat.html', context)
+            if stockage:
+                stockage.quantite = stockage.quantite - v.doses_administrées
+                stockage.save()
+                form.save(commit=False,request=request)
+                certificat = Vaccination.objects.latest('id')
+                context = {
+                    'cr': certificat
+                }
+                return render(request, 'vaccination/certificat.html', context)
+            else:
+                messages.error(request, 'Quantité insuffisante en stock pour vacciner.')
     else:
         form = VaccinationForm()
-
     return render(request, 'vaccination/vaccinationForm.html', {'form':form})
 
 
@@ -261,3 +304,10 @@ def add_staff(request):
     return render(request, 'registration/add_staff.html', {'form': form})
 
 #======------------tst-------======$#
+@login_required
+# @user_passes_test(lambda u: u.role == '')
+def vaccination_type(request):
+
+    type_vaccination = TypeVaccination.objects.all()
+
+    return render(request, 'vaccination_type.html', {'type_vaccination': type_vaccination})

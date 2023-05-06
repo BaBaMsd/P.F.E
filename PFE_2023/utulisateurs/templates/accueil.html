@@ -38,7 +38,7 @@
     <div class="row">
       
     <!-- Tableau des vaccinations par wilaya -->
-    <div class="col-md-4">
+    <div class="col-sm-12">
         <h5>Vaccinations par Wilaya</h5>
         <table class="table table-bordered">
           <thead>
@@ -57,9 +57,9 @@
           </tbody>
         </table>
     </div>
-        <div class="col-md-4">
+        <div class="col-sm-12">
     <!-- Tableau des vaccinations par moughataa -->
-    <h5>Vaccinations par Centre</h5>
+    <h5>Vaccinations par Moughataa</h5>
     <table class="table table-bordered">
       <thead>
         <tr>
@@ -77,8 +77,59 @@
       </tbody>
     </table>
 </div>
+<div class="col-sm-12 bg-white">
+   <center><h3>Vaccinations par Sexe</h3></center>
+  <div class="row">
+    <div class="col-sm-6">
+      <!-- Tableau des vaccinations par moughataa -->
+     
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Sexe</th>
+            <th>Nombre de vaccinations</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sex, count in sex_counts.items %}
+          <tr>
+            <td>{{ sex }}</td>
+            <td>{{ count }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="col-md-6">
+      <div class="bg-white">
+          <canvas id="sex"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
 
-<div class="col-md-4">
+
+<div class="col-sm-12">
+  <!-- Tableau des vaccinations par moughataa -->
+  <center><h4>Vaccinations par Age</h4></center>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Sexe</th>
+        <th>Nombre de vaccinations</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for age, count in age_counts.items %}
+      <tr>
+        <td>{{ age }}</td>
+        <td>{{ count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="col-sm-12">
     <h5>Vaccinations par Centre</h5>
     <table class="table table-bordered">
       <thead>
@@ -101,6 +152,7 @@
   </div>
 
 {% block custom_js %}
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
 <script>
     var etatData = {
@@ -146,6 +198,62 @@
       type: 'pie',
       data: vaccineData,
     });
+
+    const ctx = document.getElementById('sex').getContext('2d');
+var myChart1 = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: [{% for sex, count in sex_counts.items %} '{{ sex }}', {% endfor %}],
+        datasets: [{
+            label: 'Quantite Disponible',
+            data: [{% for sex, count in sex_counts.items %} {{ count }}, {% endfor %}],
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#2ecc71', '#e74c3c', '#3498db', '#9b59b6', '#34495e'],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true,
+                    callback: function(value, index, values) {
+                        return value + '%';
+                    }
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Pourcentage'
+                },
+                stacked: true
+            }],
+            xAxes: [{
+                stacked: true
+            }]
+        },
+        tooltips: {
+            callbacks: {
+                label: function(tooltipItem, data) {
+                    var dataset = data.datasets[tooltipItem.datasetIndex];
+                    var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                        return previousValue + currentValue;
+                    });
+                    var currentValue = dataset.data[tooltipItem.index];
+                    var percentage = Math.floor(((currentValue/total) * 100));         
+                    return percentage + "%";
+                }
+            }
+        }
+    }
+});
   </script>
 {% endblock custom_js %}
     

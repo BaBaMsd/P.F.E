@@ -12,7 +12,7 @@ from datetime import datetime
 
 #_formilair_aithentification
 class CustomLoginForm(forms.Form):
-    email = forms.CharField(label='Email ou Telephone',widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6 my-2'}))
+    email = forms.CharField(label='Email',widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6 my-2'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control col-6 my-2'}))
 
 #_formilaire_registrations
@@ -179,8 +179,19 @@ class VaccinationForm(forms.Form):
         'class':'datepicker form-control col-6',
         'type': 'date'}))
     sexe = forms.ChoiceField(choices=SEXE, widget=forms.Select(attrs={'class':'form-control col-4 my-2'}))
-    vaccine = forms.ChoiceField(choices=[(i.pk, i.nom) for i in Vaccine.objects.all()], widget=forms.Select(attrs={'class':'form-control col-6 '}))
-    date_darnier_dose = datetime.now().strftime('%Y-%m-%d')
+    vaccine = forms.ChoiceField(choices=[(s.pk, s.nom) for s in Vaccine.objects.all()], widget=forms.Select(attrs={'class':'form-control col-6 '}))
+
+    def _init_(self, *args, **kwargs):
+        request = kwargs.pop('request', None)
+        super(VaccinationForm, self)._init_(*args, **kwargs)
+        if request:
+            center = AdminCenter.objects.get(user=request.user)
+            stock = StockVaccins.objects.filter(
+                centerVaccination=center.center,
+                dateExpiration__gte=datetime.today(),
+                quantite__gte=1
+            ).select_related('vaccine')
+            self.fields['vaccine'].choices = [(s.vaccine.pk, s.vaccine.nom) for s in stock]
 
     def save(self, commit=True, request=None):
         user= request.user if request else None
@@ -199,9 +210,10 @@ class VaccinationForm(forms.Form):
             vaccine=Vaccine.objects.get(id=self.cleaned_data['vaccine']),
             dose_number =Vaccine.objects.get(id=self.cleaned_data['vaccine']).total_doses,
             center = center.center,         
-            date_darnier_dose = self.date_darnier_dose
+            date_darnier_dose = datetime.now().strftime('%Y-%m-%d')
         )
 
+        return vaccination
 #--------------staff------------------#
 class Add_staff(forms.Form):
     ROLES = (
