@@ -145,7 +145,8 @@ class StockForm(forms.Form):
         ('AJOUTER', 'Addition'),
         ('SUPRIMER', 'Suppresion'),
     ]
-    typeOperation = forms.ChoiceField(choices=OPERATION_CHOICES, widget=forms.Select(attrs={'class':'form-control col-4 my-2'}))
+    typeOperation = 'Addition'
+    # typeOperation = forms.ChoiceField(choices=OPERATION_CHOICES, widget=forms.Select(attrs={'class':'form-control col-4 my-2'}))
     vaccine = forms.ChoiceField(choices=[(i.pk, i.nom) for i in Vaccine.objects.all()], widget=forms.Select(attrs={'class':'form-control col-6 '}))
     quantite = forms.IntegerField( widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))
     dateExpiration = forms.DateField(widget= forms.DateInput(attrs={
@@ -157,7 +158,8 @@ class StockForm(forms.Form):
         user= request.user if request else None
         center = AdminCenter.objects.get(user=user)
         ligne = StockVaccins.objects.create(
-            typeOperation=self.cleaned_data['typeOperation'] ,
+            # typeOperation=self.cleaned_data['typeOperation'] ,
+            typeOperation=self.typeOperation,
             vaccine=Vaccine.objects.get(id=self.cleaned_data['vaccine']),
             #vaccine=self.cleaned_data['vaccine'],
             centerVaccination=center.center,

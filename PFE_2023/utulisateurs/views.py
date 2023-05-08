@@ -205,17 +205,18 @@ def update_vaccine(request, id):
 def stockAddition(request):
     if request.method == 'POST':
         form = StockForm(request.POST)
-        if form.is_valid():
+        if form.is_valid():          
             form.save(commit=False,request=request)
-            return redirect('/')
+            messages.success(request, 'Quantite est bien ajouter dans le stock!')
+            return redirect('stockAddition')
     else:
         form = StockForm()
 
     return render(request, 'stock/stockage.html', {'stockf': form})
 
 from django.shortcuts import render
-import matplotlib.pyplot as plt
 from django.db.models import Sum
+from utulisateurs.utils import check_stock
 
 @login_required
 @user_passes_test(lambda u: u.role in ['responsable-center', 'gerent-stock'])
@@ -223,8 +224,11 @@ def stock_center(request):
     centerAdmin = AdminCenter.objects.get(user=request.user)
     center = CentreDeVaccination.objects.get(id=centerAdmin.center.id)
 
-    stock_data = StockVaccins.objects.filter(centerVaccination=center).values('vaccine').annotate(total_quantite=Sum('quantite'))
-    #stock_data = StockVaccins.objects.all()
+    check_stock(request,centre=center)
+    stock_data = StockVaccins.objects.filter(centerVaccination=center).select_related('vaccine').values('vaccine__nom').annotate(total_quantite=Sum('quantite'))
+    
+
+
 
     context = {"stock_data": stock_data,'center': center}
 
@@ -324,8 +328,8 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 
-def remove_stock(request, vaccination_id):
-    vaccine = get_object_or_404(Vaccine, pk=vaccination_id)
+def remove_stock(request, id):
+    vaccine = get_object_or_404(Vaccine, pk=id)
     stock = sort_vaccination_stock(vaccine) # Trie le stock de vaccination
     quantite_a_supprimer = int(request.POST['quantite'])
     

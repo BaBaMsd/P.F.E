@@ -31,7 +31,7 @@ urlpatterns = [
     path('addCenterForm/', addCenterForm, name='addCenterForm'),
     path('stockAddition/', stockAddition , name='stockAddition'),
 
-    path('remove_stock/<int: id>/', remove_stock , name='remove_stock'),
+    path('remove_stock/supp/<int:id>/', remove_stock , name='remove_stock'),
     path('vaccines/update/<int:id>/', update_vaccine, name='update_vaccine'),
     path('vaccines/delete/<int:id>/', delete_vaccine, name='supp_vaccine'),
 

@@ -23,7 +23,7 @@
                       <tr>
                  
                        <td>{{ forloop.counter }}</td>
-                        <td>{{ i.vaccine.nom}}</td>
+                        <td>{{ i.vaccine__nom}}</td>
                         <td>{{ i.total_quantite }}</td>
             
                       </tr>
@@ -55,7 +55,7 @@
     var myChart1 = new Chart(ctx, {
     type: 'bar',
     data: {
-    labels: [{% for i in stock_data %} '{{ i.vaccine.nom }}', {% endfor %}],
+    labels: [{% for i in stock_data %} '{{ i.vaccine__nom }}', {% endfor %}],
     datasets: [{
     label: 'Quantite Disponible',
     data: [{% for i in stock_data %} {{ i.total_quantite }}, {% endfor %}],
@@ -87,7 +87,7 @@
     var myChart = new Chart(ctx1, {
     type: 'bar',
     data: {
-    labels: [{% for i in stock_data%} '{{ i.vaccine.nom }}', {% endfor %}],
+    labels: [{% for i in stock_data%} '{{ i.vaccine__nom }}', {% endfor %}],
     datasets: [{
     label: 'Vaccines',
     data: [{% for i in stock_data %} {{ i.total_quantite }}, {% endfor %}],
