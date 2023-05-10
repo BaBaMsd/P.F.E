@@ -2,8 +2,16 @@
 
 {% block content %}
 <div class="container">
-    <h1>Statistiques de vaccination</h1>
-  
+    <h1>Statistiques de vaccination: <b>{{ type_v.nom}}</b> </h1>
+    <div class="col-md-6">
+      <select class="form-select form-control input-group col-6" onchange="location = this.value;">
+        <option selected>Les types de vaccination</option>
+        {% for i in type_vs %}
+        <option value="{% url 'accueil' i.id %}"><a href="{% url 'accueil' i.id %}" class="nav-link">{{ i.nom }}</a></option>
+        {% endfor %}
+      </select>
+  </div>
+  <br>
     <!-- Graphique des vaccinations par état -->
     <div class="row">
       <div class="col-md-6">

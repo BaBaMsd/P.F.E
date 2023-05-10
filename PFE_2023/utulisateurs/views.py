@@ -28,14 +28,20 @@ def addCenterForm(request):
         form = AddCenterForm()
 
     return render(request, 'addCenterForm.html', {'form': form})
+@login_required
+def ac(request):
+    type_vaccination = TypeVaccination.objects.all()
+    idtp = type_vaccination[0].id   
+    
+    return redirect('accueil', id=idtp)
 
-
-def accueil(request):
+def accueil(request, id):
+    type_v = TypeVaccination.objects.get(id=id)
     if request.user.role == 'responsable-center' or request.user.role == 'gerent-stock' or request.user.role == 'professionnel':
         centre = AdminCenter.objects.get(user=request.user)
-        vaccinations = Vaccination.objects.filter(center=centre.center)
+        vaccinations = Vaccination.objects.filter(center=centre.center, vaccine__type=type_v)
     else:
-        vaccinations = Vaccination.objects.all()
+        vaccinations = Vaccination.objects.filter(vaccine__type=type_v)
 
     # Compter les vaccinations par état
     status_counts = {}
@@ -116,6 +122,8 @@ def accueil(request):
     vaccine_labels = list(vaccine_counts.keys())
     vaccine_values = list(vaccine_counts.values())
 
+    type_vs = TypeVaccination.objects.all()
+
     # Passer les données aux templates
     context = {
         'status_counts': status_counts,
@@ -130,7 +138,9 @@ def accueil(request):
         'age_counts': age_counts,
         'sex_counts': sex_counts,
         'sex_percentages': sex_percentages, 
-        'total_patient': total_patient
+        'total_patient': total_patient,
+        'type_v': type_v,
+        'type_vs': type_vs,
     }
 
     return render(request, 'accueil.html',context)

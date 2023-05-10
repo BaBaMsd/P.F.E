@@ -22,7 +22,7 @@ def login(request):
 
         if user is not None:
             Login_process(request, user)
-            return redirect('accueil')
+            return redirect('ac')
         else:
             messages.error(request, 'email ou mot pass invalid ')
             return redirect('login')
