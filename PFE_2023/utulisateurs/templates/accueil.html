@@ -36,7 +36,38 @@
     <hr> 
     <br> 
     <div class="row">
-      
+    
+      <div class="col-sm-12 bg-white">
+        <center><h3>Vaccinations par Sexe</h3></center>
+       <div class="row">
+         <div class="col-sm-6">
+           <!-- Tableau des vaccinations par moughataa -->
+          
+           <table class="table table-bordered">
+             <thead>
+               <tr>
+                 <th>Sexe</th>
+                 <th>Nombre de vaccinations</th>
+               </tr>
+             </thead>
+             <tbody>
+               {% for sex, count in sex_counts.items %}
+               <tr>
+                 <td>{{ sex }}</td>
+                 <td>{{ count }}</td>
+               </tr>
+               {% endfor %}
+             </tbody>
+           </table>
+         </div>
+         <div class="col-md-6">
+           <div class="bg-white">
+               <canvas id="sex"></canvas>
+           </div>
+         </div>
+       </div>
+     </div>
+{% if request.user.is_superuser %}
     <!-- Tableau des vaccinations par wilaya -->
     <div class="col-sm-12">
         <h5>Vaccinations par Wilaya</h5>
@@ -76,36 +107,6 @@
         {% endfor %}
       </tbody>
     </table>
-</div>
-<div class="col-sm-12 bg-white">
-   <center><h3>Vaccinations par Sexe</h3></center>
-  <div class="row">
-    <div class="col-sm-6">
-      <!-- Tableau des vaccinations par moughataa -->
-     
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Sexe</th>
-            <th>Nombre de vaccinations</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for sex, count in sex_counts.items %}
-          <tr>
-            <td>{{ sex }}</td>
-            <td>{{ count }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="col-md-6">
-      <div class="bg-white">
-          <canvas id="sex"></canvas>
-      </div>
-    </div>
-  </div>
 </div>
 
 
@@ -148,6 +149,7 @@
       </tbody>
     </table>
 </div>
+{% endif %}
 </div>
   </div>
 

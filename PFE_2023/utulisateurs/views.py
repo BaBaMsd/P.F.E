@@ -2,13 +2,18 @@ from django.shortcuts import render
 from .EmailBackend import *
 from .models import *
 from django.shortcuts import render, redirect, reverse
-from django.contrib.auth import get_user_model
-User = get_user_model()
-from django.contrib.auth import  login as Login_process, logout 
 from django.contrib import messages
 from .forms import *
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render
+from django.db.models import Sum
+from utulisateurs.utils import check_stock
+from django.db.models import Count
+from datetime import date
+from django.shortcuts import render, redirect
+from .forms import VaccineForm , DoseForm 
+from .models import Dose, Vaccine
 
 @login_required
 #@user_passes_test(lambda u: u.role == 'directeur-regional')
@@ -23,8 +28,8 @@ def addCenterForm(request):
         form = AddCenterForm()
 
     return render(request, 'addCenterForm.html', {'form': form})
-from django.db.models import Count
-from datetime import date
+
+
 def accueil(request):
     if request.user.role == 'responsable-center' or request.user.role == 'gerent-stock' or request.user.role == 'professionnel':
         centre = AdminCenter.objects.get(user=request.user)
@@ -143,10 +148,7 @@ def liste_vaccine(request):
 
 #<--------------------vaccinsDose----------->
 
-from django.shortcuts import render, redirect
-from .forms import VaccineForm , DoseForm, DoseFormSet 
-from .models import Dose, Vaccine
-from .models import Vaccine, Dose
+
 
 @login_required
 def add_vaccine(request):
@@ -214,9 +216,50 @@ def stockAddition(request):
 
     return render(request, 'stock/stockage.html', {'stockf': form})
 
-from django.shortcuts import render
-from django.db.models import Sum
-from utulisateurs.utils import check_stock
+
+
+@login_required
+@user_passes_test(lambda u: u.role in ['responsable-center', 'gerent-stock'])
+def stockSuppresion(request):
+    if request.method == 'POST':
+        vaccine = Vaccine.objects.get(nom=request.POST['vaccine'])
+        quantite_a_supprimer = int(request.POST['quantite'])
+        stock = StockVaccins.objects.filter(vaccine=vaccine)
+
+        total_disponible = sum([s.quantite for s in stock])
+        if quantite_a_supprimer > total_disponible:
+            # Si la quantité à retirer est supérieure à la quantité disponible, affiche une erreur
+            messages.error(request, "La quantité à retirer est supérieure à la quantité disponible dans le stock.")
+            return redirect('stockSuppresion')
+         # Retire la quantité de doses de vaccin du stock
+        for s in stock:
+            if s.quantite >= quantite_a_supprimer:
+                s.quantite -= quantite_a_supprimer
+                s.save()
+                break
+            else:
+                quantite_a_supprimer -= s.quantite
+                s.quantite = 0
+                s.save()
+        messages.success(request, 'L\'operation effectuer avec succée ')
+        centerAdmin = AdminCenter.objects.get(user=request.user)
+        center = CentreDeVaccination.objects.get(id=centerAdmin.center.id)
+        histoir = HistoriqueStock.objects.create(
+            typeOperation='Suppresion',
+            quantite=quantite_a_supprimer,
+            dateExpiration = date.today(),
+            vaccine = vaccine,
+            centerVaccination=center
+        )
+        # Redirige vers la page de détail de la vaccination
+        return redirect('stockSuppresion')
+
+    centerAdmin = AdminCenter.objects.get(user=request.user)
+    center = CentreDeVaccination.objects.get(id=centerAdmin.center.id)
+    stock_data = StockVaccins.objects.filter(centerVaccination=center).distinct('vaccine')
+
+
+    return render(request, 'stock/stockSuppresion.html', {'stock_data': stock_data})
 
 @login_required
 @user_passes_test(lambda u: u.role in ['responsable-center', 'gerent-stock'])

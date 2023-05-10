@@ -154,7 +154,7 @@ class HistoriqueStock(models.Model):
         ('AJOUTER', 'Addition'),
         ('SUPRIMER', 'Suppresion'),
     ]
-    typeOperation = models.CharField(max_length=15, choices=OPERATION_CHOICES)
+    typeOperation = models.CharField(max_length=15)
     vaccine = models.ForeignKey(Vaccine, on_delete=models.CASCADE)
     quantite = models.PositiveIntegerField()
     dateExpiration = models.DateField()
