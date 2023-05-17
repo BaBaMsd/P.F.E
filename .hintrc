@@ -10,6 +10,12 @@
     "no-inline-styles": "off",
     "axe/text-alternatives": "off",
     "axe/name-role-value": "off",
-    "axe/forms": "off"
+    "axe/forms": "off",
+    "axe/parsing": [
+      "default",
+      {
+        "duplicate-id-aria": "off"
+      }
+    ]
   }
 }

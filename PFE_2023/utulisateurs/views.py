@@ -111,7 +111,7 @@ def accueil(request, id):
         sex_percentages[sex_count['sexe']] = round(sex_count['count'] / total_patient * 100)
 
     sex_counts = {}
-    sex_labels = ['femme', 'homme']
+    sex_labels = ['Femme', 'Homme']
     for label in sex_labels:
         sex_counts[label] = vaccinations.filter(patient__sexe=label).count()
     
@@ -170,6 +170,9 @@ def add_vaccine(request):
 
             vaccine = vaccine_form.save()
             doses_number = vaccine_form.cleaned_data['total_doses']
+            if doses_number == 1:
+                messages.success(request, 'La vaccin a bien ajouter')
+                return redirect('add_vaccine')
 
             DoseFormSet = forms.inlineformset_factory(Vaccine, Dose, form=DoseForm, extra=doses_number - 2, min_num=1)
             formset = DoseFormSet()
@@ -185,7 +188,8 @@ def add_vaccine(request):
                 dose.vaccine = Vaccine.objects.latest('id')
                 dose.number = i
                 dose.save()
-            return redirect('accueil')
+            messages.success(request, 'La vaccin a bien ajouter')
+            return redirect('add_vaccine')
     else:
         vaccine_form = VaccineForm()
 
@@ -293,22 +297,72 @@ def stock_center(request):
 def add_vaccination(request):
     
     if request.method == 'POST':
-        form = VaccinationForm(request.POST)
-        if form.is_valid():
-            vaccine1 = form.cleaned_data['vaccine']
-            v = Vaccine.objects.get(id=vaccine1)
-            print(v.doses_administrées)
-            admin = AdminCenter.objects.get(user=request.user)
-            center=admin.center
-            stockage = StockVaccins.objects.filter(vaccine=vaccine1,
+        centerAdmin = AdminCenter.objects.get(user=request.user)
+        center = CentreDeVaccination.objects.get(id=centerAdmin.center.id)
+        vaccine = Vaccine.objects.get(id=request.POST['vaccine'])
+        if Vaccination.objects.filter(patient__nni=request.POST['nni'],vaccine__type=vaccine.type).exists():
+            print('exist')
+            messages.error(request, "Ce patient a déja pris cette vaccination!")
+            return redirect('add_vaccination')
+        elif Patient.objects.filter(nni=request.POST['nni']).exists():
+            patient_av = Patient.objects.get(nni=request.POST['nni'])
+            vaccination = Vaccination()
+            vaccination.patient = patient_av,
+            vaccination.vaccine=vaccine,
+            vaccination.dose_number =vaccine.total_doses,
+            vaccination.center = center.center,         
+            vaccination.date_darnier_dose = datetime.now().strftime('%Y-%m-%d')
+        
+            stockage = StockVaccins.objects.filter(vaccine=vaccine,
             centerVaccination=center,
             dateExpiration__gte=datetime.today(),
-            quantite__gte=v.doses_administrées
+            quantite__gte=vaccine.doses_administrées 
             ).order_by('dateExpiration').first()
             if stockage:
-                stockage.quantite = stockage.quantite - v.doses_administrées
+                stockage.quantite = stockage.quantite - vaccine.doses_administrées
                 stockage.save()
-                form.save(commit=False,request=request)
+                vaccination.save()
+                # stock les informations de chaque dose pour le certificat darnier
+                dose_vaccinations = Vaccin_Dose()
+                dose_vaccinations.numeroDose = vaccination.dose_administré
+                dose_vaccinations.vaccination = vaccination
+                dose_vaccinations.vaccins=vaccination.vaccine
+                dose_vaccinations.date_dose=vaccination.date_darnier_dose
+                dose_vaccinations.centre=vaccination.center
+                dose_vaccinations.save()
+                certificat = Vaccination.objects.latest('id')
+                context = {
+                    'cr': certificat,
+                    'stockage': stockage
+                }
+                return render(request, 'vaccination/certificat.html', context)
+            else:
+                messages.error(request, 'Quantité insuffisante en stock pour vacciner.')
+        else:
+            patient = Patient()
+            vaccination_p = Vaccination()
+            patient.nom = request.POST['nom']
+            patient.prenom = request.POST['prenom']
+            patient.nni = request.POST['nni']
+            patient.sexe = request.POST['sexe']
+            patient.dateNaissance = request.POST['dateNaissence']
+         
+            vaccination_p.vaccine=vaccine
+            vaccination_p.dose_number =vaccine.total_doses
+            vaccination_p.center = center         
+            vaccination_p.date_darnier_dose = datetime.now().strftime('%Y-%m-%d')
+
+            stockage = StockVaccins.objects.filter(vaccine=vaccine,
+            centerVaccination=center,
+            dateExpiration__gte=datetime.today(),
+            quantite__gte=vaccine.doses_administrées
+            ).order_by('dateExpiration').first()
+            if stockage:
+                stockage.quantite = stockage.quantite - vaccine.doses_administrées
+                stockage.save()
+                patient.save()
+                vaccination_p.patient = patient
+                vaccination_p.save()
                 certificat = Vaccination.objects.latest('id')
                 context = {
                     'cr': certificat
@@ -316,9 +370,38 @@ def add_vaccination(request):
                 return render(request, 'vaccination/certificat.html', context)
             else:
                 messages.error(request, 'Quantité insuffisante en stock pour vacciner.')
-    else:
-        form = VaccinationForm()
-    return render(request, 'vaccination/vaccinationForm.html', {'form':form})
+     
+
+             
+        # form = VaccinationForm(request.POST)
+        # if form.is_valid():
+        #     vaccine1 = form.cleaned_data['vaccine']
+        #     v = Vaccine.objects.get(id=vaccine1)
+        #     admin = AdminCenter.objects.get(user=request.user)
+        #     center=admin.center
+        #     stockage = StockVaccins.objects.filter(vaccine=vaccine1,
+        #     centerVaccination=center,
+        #     dateExpiration__gte=datetime.today(),
+        #     quantite__gte=v.doses_administrées
+        #     ).order_by('dateExpiration').first()
+        #     if stockage:
+        #         stockage.quantite = stockage.quantite - v.doses_administrées
+        #         stockage.save()
+        #         form.save(commit=False,request=request)
+        #         certificat = Vaccination.objects.latest('id')
+        #         context = {
+        #             'cr': certificat
+        #         }
+        #         return render(request, 'vaccination/certificat.html', context)
+        #     else:
+        #         messages.error(request, 'Quantité insuffisante en stock pour vacciner.')
+    # else:
+    #     form = VaccinationForm()
+    centerAdmin = AdminCenter.objects.get(user=request.user)
+    center = CentreDeVaccination.objects.get(id=centerAdmin.center.id)
+    stock_data = StockVaccins.objects.filter(centerVaccination=center).distinct('vaccine')
+
+    return render(request, 'vaccination/vaccinationForm.html', {'stock_data':stock_data})
 
 
 def vaccination_complementaire(request):
@@ -330,7 +413,7 @@ def vaccination_complementaire(request):
             certificats = Vaccination.objects.get(patient=patien)
             admin = AdminCenter.objects.get(user=request.user)
             center=admin.center
-            certificats.dose_administré += 1
+            certificats.dose_administré += 1    
             certificats.date_darnier_dose = datetime.today()
             certificats.center=center
             certificats.save()

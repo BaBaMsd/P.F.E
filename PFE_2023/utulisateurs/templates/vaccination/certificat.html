@@ -12,21 +12,22 @@
         <div class="card col-md-10">
             <div class="card-body">
                     <div class="">
-                       <center> <h5>CARTE DE VACCINATION </h5> </center><br>
-                       <center><b>Campagne de vaccination contre la {{ cr.vaccine.type.nom }}</b></center>
-                    </div>
-                    
-                    <ul class="list-group list-group-flush ">
-                        <li class="list-group-item"><b>Moughataa de: </b>{{ cr.center.moughataa}}</li>
-                        <li class="list-group-item"><b>Site de vaccination: </b>{{ cr.center.nom}}</li>
-                        <li class="list-group-item"><b>Nom: </b>{{ cr.patient.nom}} {{ cr.patient.prenom}}</li>
-                        <li class="list-group-item"><b>NNI: </b>{{ cr.patient.nni}}</li>
-                        <li class="list-group-item"><b>Date naisence: </b>{{ cr.patient.dateNaissance|date:"d/m/Y"}}</li>
-                        <li class="list-group-item"><b>Nom du vaccine: </b>{{ cr.vaccine.nom}}</li>
-                        <li class="list-group-item"><b>Total Dose: </b>{{ cr.vaccine.total_doses}}</li>
-                        <li class="list-group-item"><b>Dose administré: </b>{{ cr.dose_administré}}</li>
-                        <li class="list-group-item"><b>Date Prise: </b>{{ cr.date_darnier_dose|date:"d/m/Y"}}</li>
-                        <li class="list-group-item"><b>Status: </b>{{ cr.status}}</li>
+                        <center> <h5> بطاقة تلقيح</h5> </center>
+                       <center> <h5>CARTE DE VACCINATION </h5> </center>
+                       <center><h6>{{ cr.vaccine.type.nom }}</h6></center>
+                    </div>                    
+                    <ul class="list-group list-group-flush "> 
+                        <li class="list-group-item" style="font-size: 18px;">Wilaya:{{ cr.center.moughataa.wilaya.nom}}</li>
+                        <li class="list-group-item" style="font-size: 18px;">Moughataa: {{ cr.center.moughataa}}</li>        
+                        <li class="list-group-item" style="font-size: 18px;">Nom: {{ cr.patient.nom}} {{ cr.patient.prenom}}</li>
+                        <li class="list-group-item" style="font-size: 18px;">NNI: {{ cr.patient.nni}}</li>
+                        <li class="list-group-item" style="font-size: 18px;">Date naisence: {{ cr.patient.dateNaissance|date:"d/m/Y"}}</li>
+                        <li class="list-group-item" style="font-size: 18px;">Dose: {{ cr.dose_administré}}/{{ cr.vaccine.total_doses}}</li>
+                        <li class="list-group-item" style="font-size: 18px;">Vaccin: {{ cr.vaccine.nom}}</li>
+                        <li class="list-group-item" style="font-size: 18px;">Centre: {{ cr.center.nom}}</li>
+                        <li class="list-group-item" style="font-size: 18px;">Date: {{ cr.date_darnier_dose|date:"d/m/Y"}}</li>
+                        <li class="list-group-item" style="font-size: 18px;">Numéro de Lot: {{ stockage.vaccine.numeroLot}}</li>
+                        <!-- <li class="list-group-item"><b>Status: </b>{{ cr.status}}</li> -->
                         <li class="list-group-item"><img src="{{ cr.qr_code.url}}" width="200" height="200"></li>
 
                     </ul>

@@ -152,7 +152,8 @@ class StockForm(forms.Form):
     dateExpiration = forms.DateField(widget= forms.DateInput(attrs={
         'class':'datepicker form-control col-6',
         'type': 'date'}))
-   
+    numeroLot = forms.CharField(label= "Numéro de Lot", widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))
+
     
     def save(self, commit=True, request=None):
         user= request.user if request else None
@@ -165,6 +166,7 @@ class StockForm(forms.Form):
             centerVaccination=center.center,
             #centerVaccination=CentreDeVaccination.objects.get(id=self.cleaned_data['centerVaccination']),
             quantite=self.cleaned_data['quantite'],
+            numeroLot=self.cleaned_data['numeroLot'],
             dateExpiration=self.cleaned_data['dateExpiration'],
         )
 #---------------------vaccination----------------#

@@ -4,12 +4,48 @@
 {% block content %}
 
 <div class="container ">
-            <h3>Vaccination</h3>
+            <h2>Nouvelle Vaccination</h2>
             <form method=POST>
-                {% csrf_token %}
+                <!-- {% csrf_token %}
                 {{ form.as_p }}
-                <button type="submit" class="btn btn-outline-info mb-4">Effectuer</button>
-            </form> 
+                <button type="submit" class="btn btn-outline-info mb-4">Effectuer</button> -->
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="nni">Nni</label>
+                    <input type="number" class="form-control input-group mb-3 col-6" id="nni" name="nni" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="nom">Nom</label>
+                    <input type="text" class="form-control input-group mb-3 col-6" id="nom" name="nom" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="prenom">Prénom</label>
+                    <input type="text" class="form-control input-group mb-3 col-6" id="prenom" name="prenom" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="dateNaissence">DateNaissence</label>
+                    <input type="date" class="form-control input-group mb-3 col-6" id="dateNaissence" name="dateNaissence" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="sexe">Sexe</label>
+                    <select class="form-select form-control input-group mb-3 col-6"  Required name="sexe">
+                      <option value="Homme">H</option> 
+                      <option value="Femme">F</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="vaccine">Vaccine</label>
+                    <select class="form-select form-control input-group mb-3 col-6"  Required name="vaccine">
+                      {% for i in stock_data %}
+                      <option value="{{i.vaccine.id}}">{{ i.vaccine.nom }}</option> 
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Vacciner</button>
+                    <br>
+                  </div>
+              </form>
         </div>
 
     </div>

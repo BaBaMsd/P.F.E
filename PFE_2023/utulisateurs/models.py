@@ -144,6 +144,7 @@ class StockVaccins(models.Model):
     dateExpiration = models.DateField()
     dateOperation = models.DateTimeField(auto_now_add=True)
     centerVaccination = models.ForeignKey(CentreDeVaccination, on_delete=models.CASCADE)
+    numeroLot = models.CharField(max_length=50, default='I18207')
 
     def __str__(self):
         return f'{self.vaccine.nom} {self.centerVaccination.nom}  '
@@ -160,6 +161,7 @@ class HistoriqueStock(models.Model):
     dateExpiration = models.DateField()
     dateOperation = models.DateTimeField(auto_now_add=True)
     centerVaccination = models.ForeignKey(CentreDeVaccination, on_delete=models.CASCADE)
+    numeroLot = models.CharField(max_length=50, default='I18207')
 
     def __str__(self):
         return f'{self.vaccine.nom} {self.centerVaccination.nom}  '
@@ -178,6 +180,7 @@ def create_historiqueStock(sender, instance, created, **kwargs):
             dateExpiration=instance.dateExpiration,
             dateOperation=instance.dateOperation,
             centerVaccination=instance.centerVaccination,
+            numeroLot = instance.numeroLot
            
         )
 
@@ -245,7 +248,13 @@ def changeStatus(sender, instance,*args, **kwargs):
         instance.qr_code.save(f"{instance.patient.nom}-vaccination-qr-code.png", File(buffer), save=False)
 
         
-
+class Vaccin_Dose(models.Model):
+    vaccination = models.ForeignKey(Vaccination, on_delete=models.CASCADE)
+    date_dose = models.DateField()
+    numeroDose = models.IntegerField()
+    vaccins = models.ForeignKey(Vaccine, on_delete=models.CASCADE)
+    centre = models.ForeignKey(CentreDeVaccination, on_delete=models.CASCADE)
+    numeroLot = models.CharField(max_length=50)
 
 
 
