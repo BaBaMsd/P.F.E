@@ -60,13 +60,27 @@ def register_patient(request):
         
         return Response('ERRROR', status=400)
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUserData(request,id):
     if request.method == 'GET':
-        patient = Patient.objects.get(id=id)
-        # vaccination = Vaccination.objects.get(patient=patient)
-        return Response({
-                'id':patient.id,
-        },status=Response.status_code)
+        try:
+            patient = Patient.objects.get(id=id)
+            vaccination = Vaccination.objects.get(patient=patient)
+        except Patient.DoesNotExist:
+            return Response(status=404)
+        user_data = {
+        'id': vaccination.patient.id,
+        'nni': vaccination.patient.nni,
+        'nom_vaccination':vaccination.vaccine.nom,
+        'centre':vaccination.center.nom,
+        'dose_number':vaccination.dose_number,
+        'dose_administré':vaccination.dose_administré,
+        'date_dernier_dose':vaccination.date_darnier_dose,
+        'status':vaccination.status,
+        'wilaya':str(vaccination.center.moughataa.nom),
+        'moughataa': str(vaccination.center.moughataa.wilaya.nom),
+        }
+        return Response(user_data,status = 200)
 

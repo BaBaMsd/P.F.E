@@ -23,6 +23,7 @@ urlpatterns = [
     path('ac/', ac, name='ac'),
     path('centres/', centres, name='centres'),
     path('stock_center/', stock_center, name='stock_center'),
+    path('historique_stock/', historique_stock, name='historique_stock'),
     path('logout/', auth_views.LogoutView.as_view(template_name='registration/logout.html'), name='logout'),
     path('add_vaccine/', add_vaccine, name='add_vaccine'),
     path('add_vaccination/', add_vaccination, name='add_vaccination'),

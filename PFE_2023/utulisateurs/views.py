@@ -22,7 +22,7 @@ def addCenterForm(request):
         form = AddCenterForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('accueil')
+            return redirect('addCenterForm')
 
     else:
         form = AddCenterForm()
@@ -121,6 +121,8 @@ def accueil(request, id):
     status_values = list(status_counts.values())
     vaccine_labels = list(vaccine_counts.keys())
     vaccine_values = list(vaccine_counts.values())
+    wilaya_labels = list(wilaya_counts.keys())
+    wilaya_values = list(wilaya_counts.values())
 
     type_vs = TypeVaccination.objects.all()
 
@@ -132,6 +134,8 @@ def accueil(request, id):
         'wilaya_counts': wilaya_counts,
         'status_labels': status_labels,
         'status_values': status_values,
+        'wilaya_labels': wilaya_labels,
+        'wilaya_values': wilaya_values,
         'vaccine_labels': vaccine_labels,
         'vaccine_values': vaccine_values,
         'centre_counts': centre_counts,
@@ -144,6 +148,8 @@ def accueil(request, id):
     }
 
     return render(request, 'accueil.html',context)
+
+
 
 def centres(request):
     centres = CentreDeVaccination.objects.all()
@@ -230,6 +236,18 @@ def stockAddition(request):
 
     return render(request, 'stock/stockage.html', {'stockf': form})
 
+@login_required
+@user_passes_test(lambda u: u.role in ['responsable-center', 'gerent-stock'])
+def historique_stock(request):
+    ad = AdminCenter.objects.get(user=request.user)
+    histoir=HistoriqueStock.objects.filter(centerVaccination=ad.center).order_by('-id')
+
+    contex = {
+        'histoir': histoir
+    }
+
+    return render(request, 'histoir.html', contex)
+
 
 
 @login_required
@@ -292,6 +310,13 @@ def stock_center(request):
     # Rendre le template avec le contexte
     return render(request, "stock/stock_donnest.html", context)
 
+import random
+
+def générer_id_certificat():
+    hex_chars = '0123456789ABCDEF'
+    return ''.join(random.choice(hex_chars) for _ in range(10))
+
+
 @login_required
 @user_passes_test(lambda u: u.role in ['responsable-center', 'professionnel'])
 def add_vaccination(request):
@@ -322,14 +347,7 @@ def add_vaccination(request):
                 stockage.quantite = stockage.quantite - vaccine.doses_administrées
                 stockage.save()
                 vaccination.save()
-                # stock les informations de chaque dose pour le certificat darnier
-                dose_vaccinations = Vaccin_Dose()
-                dose_vaccinations.numeroDose = vaccination.dose_administré
-                dose_vaccinations.vaccination = vaccination
-                dose_vaccinations.vaccins=vaccination.vaccine
-                dose_vaccinations.date_dose=vaccination.date_darnier_dose
-                dose_vaccinations.centre=vaccination.center
-                dose_vaccinations.save()
+               
                 certificat = Vaccination.objects.latest('id')
                 context = {
                     'cr': certificat,
@@ -364,39 +382,34 @@ def add_vaccination(request):
                 vaccination_p.patient = patient
                 vaccination_p.save()
                 certificat = Vaccination.objects.latest('id')
+
+                if certificat.dose_administré == certificat.vaccine.total_doses:
+                    CF = CertificatVaccination()
+                    CF.id_certificat = générer_id_certificat()
+                    CF.patient = patient
+                    CF.vaccin = vaccine
+                    CF.date_delivration = datetime.now().strftime('%Y-%m-%d')
+                    CF.valide = True
+                    CF.save()
+
+                    VD = Vaccin_Dose.objects.filter(patient=CF.patient, vaccin=CF.vaccin)
+                    CF.doses.clear()
+                    CF.doses.set(VD)
+                
+                id_certificat =  CertificatVaccination.objects.get(patient=certificat.patient)
+                id_certificat.doses.clear()
+                VD = Vaccin_Dose.objects.filter(patient=CF.patient, vaccin=CF.vaccin)
+                id_certificat.doses.set(VD)
+                id_certificat.save()
+
                 context = {
-                    'cr': certificat
+                    'cr': certificat,
+                    'id_certificat': id_certificat
                 }
                 return render(request, 'vaccination/certificat.html', context)
             else:
                 messages.error(request, 'Quantité insuffisante en stock pour vacciner.')
      
-
-             
-        # form = VaccinationForm(request.POST)
-        # if form.is_valid():
-        #     vaccine1 = form.cleaned_data['vaccine']
-        #     v = Vaccine.objects.get(id=vaccine1)
-        #     admin = AdminCenter.objects.get(user=request.user)
-        #     center=admin.center
-        #     stockage = StockVaccins.objects.filter(vaccine=vaccine1,
-        #     centerVaccination=center,
-        #     dateExpiration__gte=datetime.today(),
-        #     quantite__gte=v.doses_administrées
-        #     ).order_by('dateExpiration').first()
-        #     if stockage:
-        #         stockage.quantite = stockage.quantite - v.doses_administrées
-        #         stockage.save()
-        #         form.save(commit=False,request=request)
-        #         certificat = Vaccination.objects.latest('id')
-        #         context = {
-        #             'cr': certificat
-        #         }
-        #         return render(request, 'vaccination/certificat.html', context)
-        #     else:
-        #         messages.error(request, 'Quantité insuffisante en stock pour vacciner.')
-    # else:
-    #     form = VaccinationForm()
     centerAdmin = AdminCenter.objects.get(user=request.user)
     center = CentreDeVaccination.objects.get(id=centerAdmin.center.id)
     stock_data = StockVaccins.objects.filter(centerVaccination=center).distinct('vaccine')
@@ -409,18 +422,41 @@ def vaccination_complementaire(request):
         form = Complemantaire_V(request.POST)
         if form.is_valid():
             nni = form.cleaned_data['nni']
-            patien = Patient.objects.get(nni=nni)
-            certificats = Vaccination.objects.get(patient=patien)
-            admin = AdminCenter.objects.get(user=request.user)
-            center=admin.center
-            certificats.dose_administré += 1    
-            certificats.date_darnier_dose = datetime.today()
-            certificats.center=center
-            certificats.save()
-            context = {
-                    'cr': certificats
-                }
-            return render(request, 'vaccination/certificat.html', context)
+            if Patient.objects.filter(nni=nni).exists():   
+                patien = Patient.objects.get(nni=nni)   
+                certificats = Vaccination.objects.get(patient=patien)
+                admin = AdminCenter.objects.get(user=request.user)
+                center=admin.center
+                certificats.dose_administré += 1    
+                certificats.date_darnier_dose = datetime.today()
+                certificats.center=center
+                certificats.save()
+                dose = Vaccin_Dose()
+                dose.vaccination=certificats
+                dose.patient=certificats.patient
+                dose.vaccin=certificats.vaccine
+                dose.save()
+                if certificats.dose_administré == certificats.vaccine.total_doses:
+                    CF = CertificatVaccination()
+                    CF.id_certificat=générer_id_certificat(),
+                    CF.patient=certificats.patient,
+                    CF.vaccin=certificats.vaccine,
+                    CF.date_delivration=certificats.date_darnier_dose,
+                    CF.valide=True
+                    VD = Vaccin_Dose.objects.filter(vaccination__id=certificats.id, patien=certificats.patient,vaccin=certificats.vaccine)
+                    for i in VD:
+                        CF.doses.add(i)
+                    CF.save()
+                
+                id_certificat =  CertificatVaccination.objects.get(patient=certificats.patient)
+                context = {
+                        'cr': certificats,
+                        'id_certificat': id_certificat
+                    }
+                return render(request, 'vaccination/certificat.html', context)
+            else:
+                messages.error(request, 'Ce NNI ne corespond pas a un patient')
+                return redirect('vaccination_complementaire')
         else:
             return redirect('vaccination_complementaire')
     else:

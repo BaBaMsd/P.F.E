@@ -5,18 +5,20 @@
  <div class="container">
  <div class="py-3 px-3">
     <div class="py-1">
-        <button id="print-button" onclick="window.print();" class="btn btn-secondary print-hide">Imprimer</button>
+        <button id="print-button" onclick="window.print();" class="btn btn-primary print-hide">Imprimer</button>
+        <a id="print-button1" href="{% url 'add_vaccination' %}" class="btn btn-secondary print-hide">Annuler</a>
+
     </div>
  </div>
  <div class="px-3">
         <div class="card col-md-10">
             <div class="card-body">
                     <div class="">
-                        <center> <h5> بطاقة تلقيح</h5> </center>
-                       <center> <h5>CARTE DE VACCINATION </h5> </center>
-                       <center><h6>{{ cr.vaccine.type.nom }}</h6></center>
+                        <center> <h3> بطاقة تلقيح</h3> </center>
+                       <center> <h3>CARTE DE VACCINATION </h3> </center>
+                       <center><h4>{{ cr.vaccine.type.nom }}</h4></center>
                     </div>                    
-                    <ul class="list-group list-group-flush "> 
+                    <!-- <ul class="list-group list-group-flush "> 
                         <li class="list-group-item" style="font-size: 18px;">Wilaya:{{ cr.center.moughataa.wilaya.nom}}</li>
                         <li class="list-group-item" style="font-size: 18px;">Moughataa: {{ cr.center.moughataa}}</li>        
                         <li class="list-group-item" style="font-size: 18px;">Nom: {{ cr.patient.nom}} {{ cr.patient.prenom}}</li>
@@ -27,10 +29,62 @@
                         <li class="list-group-item" style="font-size: 18px;">Centre: {{ cr.center.nom}}</li>
                         <li class="list-group-item" style="font-size: 18px;">Date: {{ cr.date_darnier_dose|date:"d/m/Y"}}</li>
                         <li class="list-group-item" style="font-size: 18px;">Numéro de Lot: {{ stockage.vaccine.numeroLot}}</li>
-                        <!-- <li class="list-group-item"><b>Status: </b>{{ cr.status}}</li> -->
+                        <li class="list-group-item"><b>Status: </b>{{ cr.status}}</li>
                         <li class="list-group-item"><img src="{{ cr.qr_code.url}}" width="200" height="200"></li>
 
-                    </ul>
+                    </ul> -->
+                    <hr>
+                    <table class="table table-borderless">
+                        <tbody>
+                          <tr style="font-size: 18px;">
+                            <td>Wilaya: {{ cr.center.moughataa.wilaya.nom}}</td>
+                            <td style="text-align: right;">الولاىة</td>
+                          </tr>
+                          <tr style="font-size: 18px;">
+                            <td>Moughataa: {{ cr.center.moughataa.nom}}</td>
+                            <td style="text-align: right;">المقاطعة</td>
+                          </tr>
+                          <tr style="font-size: 18px;">
+                            <td>Nom Complet: {{ cr.patient.nom}}</td>
+                            <td style="text-align: right;">الإسم الكامل</td>
+                          </tr>
+                          <tr style="font-size: 18px;">
+                            <td>NNI: {{ cr.patient.nni}}</td>
+                            <td style="text-align: right;">الرقم الوطني</td>
+                          </tr>
+                          <tr style="font-size: 18px;">
+                            <td>Date de Naisence: {{ cr.patient.dateNaissance|date:"d/m/Y"}}</td>
+                            <td style="text-align: right;">تاريخ الميلاد</td>
+                          </tr>
+                          
+                          <tr style="font-size: 18px;">
+                            <td>Dose: {{ cr.dose_administré}}/{{ cr.vaccine.total_doses}}</td>
+                            <td style="text-align: right;">الجرعة</td>
+                          </tr>
+                          <tr style="font-size: 18px;">
+                            <td>Vaccin: {{ cr.vaccine.nom}}</td>
+                            <td style="text-align: right;">اللقاح</td>
+                          </tr>
+                          <tr style="font-size: 18px;">
+                            <td>Centre: {{ cr.center.nom}}</td>
+                            <td style="text-align: right;">المركز</td>
+                          </tr>
+                          <tr style="font-size: 18px;">
+                            <td>Date: {{ cr.date_darnier_dose|date:"d/m/Y"}}</td>
+                            <td style="text-align: right;">التاريخ</td>
+                          </tr>
+                          <tr>
+                            <td><img src="{{ cr.qr_code.url}}" width="200" height="200"></td>
+                            <td></td>
+                          </tr>
+                          <tr style="font-size: 18px;">
+                            {% if id_certificat %}
+                              <td>ID Certificat: {{ id_certificat.id_certificat }}</td>
+                            {% endif%}
+                            <td></td>
+                          </tr>
+                        </tbody>
+                      </table>
                     
             </div>
         </div>
@@ -43,9 +97,15 @@
 window.addEventListener("beforeprint", function() {
     document.getElementById("print-button").style.display = "none";
   });
+  window.addEventListener("beforeprint", function() {
+    document.getElementById("print-button1").style.display = "none";
+  });
   
   window.addEventListener("afterprint", function() {
     document.getElementById("print-button").style.display = "inline-block";
+  });
+  window.addEventListener("afterprint", function() {
+    document.getElementById("print-button1").style.display = "inline-block";
   });
 </script>
 {% endblock custom_js %}

@@ -12,6 +12,8 @@
       </select>
   </div>
   <br>
+  <center> <h4 class="bg-white">La Nombre totale de Patient: {{ total_patient }}</h4></center>
+  
     <!-- Graphique des vaccinations par état -->
     <div class="row">
       <div class="col-md-6 bg-white">
@@ -74,6 +76,35 @@
          </div>
        </div>
      </div>
+     <div class="col-sm-12 bg-white">
+      <center><h4>Vaccinations par age</h4></center>
+      <hr>
+     <div class="row">
+       <div class="col-sm-6"> 
+         <table class="table table-bordered">
+           <thead>
+             <tr>
+               <th>Age</th>
+               <th>Nombre de vaccinations</th>
+             </tr>
+           </thead>
+           <tbody>
+             {% for age, count in age_counts.items %}
+             <tr>
+               <td>{{ age }}</td>
+               <td>{{ count }}</td>
+             </tr>
+             {% endfor %}
+           </tbody>
+         </table>
+       </div>
+       <div class="col-md-6">
+         <div class="bg-white">
+             <canvas id="age"></canvas>
+         </div>
+       </div>
+     </div>
+    </div>
 {% if request.user.is_superuser %}
     <!-- Tableau des vaccinations par wilaya -->
     <div class="row">
@@ -103,30 +134,11 @@
          </div>
          <div class="col-md-6">
            <div class="bg-white">
-               <canvas id="wilaya"></canvas>
+               <canvas id="wilayaCharte"></canvas>
            </div>
          </div>
        </div>
      </div>
-    <div class="col-sm-12">
-        <h5>Vaccinations par Wilaya</h5>
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th>Wilaya</th>
-              <th>Nombre de vaccinations</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for wilaya, count in wilaya_counts.items %}
-            <tr>
-              <td>{{ wilaya }}</td>
-              <td>   {{ count }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-    </div>
         <div class="col-sm-12">
     <!-- Tableau des vaccinations par moughataa -->
     <h5>Vaccinations par Moughataa</h5>
@@ -148,27 +160,6 @@
     </table>
 </div>
 
-
-<div class="col-sm-12">
-  <!-- Tableau des vaccinations par moughataa -->
-  <center><h4>Vaccinations par Age</h4></center>
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>Sexe</th>
-        <th>Nombre de vaccinations</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for age, count in age_counts.items %}
-      <tr>
-        <td>{{ age }}</td>
-        <td>{{ count }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
 <div class="col-sm-12">
     <h5>Vaccinations par Centre</h5>
     <table class="table table-bordered">
@@ -192,6 +183,7 @@
 </div>
   </div>
 
+
 {% block custom_js %}
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
@@ -212,6 +204,7 @@
         ],
       }]
     };
+
   
     var vaccineData = {
       labels: {{ vaccine_labels|safe }},
@@ -229,7 +222,8 @@
         ],
       }]
     };
-  
+
+    
     var etatChart = new Chart(document.getElementById("etatChart"), {
       type: 'pie',
       data: etatData,
@@ -239,6 +233,11 @@
       type: 'pie',
       data: vaccineData,
     });
+
+    // var wilayaChart = new Chart(document.getElementById("wilayaCharte"), {
+    //   type: 'pie',
+    //   data: wilayaData,
+    // });
 
 const ctx = document.getElementById('sex').getContext('2d');
 var myChart1 = new Chart(ctx, {
@@ -296,14 +295,15 @@ var myChart1 = new Chart(ctx, {
         }
     }
 });
-const ctxw = document.getElementById('wilaya').getContext('2d');
-var myChart1 = new Chart(ctxw, {
-    type: 'pie',
+
+const ctx2 = document.getElementById('age').getContext('2d');
+var myChart1 = new Chart(ctx2, {
+    type: 'bar',
     data: {
-        labels: [{% for wilaya, count in wilaya_counts.items %} '{{ wilaya }}', {% endfor %}],
+        labels: [{% for age, count in age_counts.items %} '{{ age }}', {% endfor %}],
         datasets: [{
             label: 'Diagramme de vaccination',
-            data: [{% for wilaya, count in wilaya_counts.items %} {{ count }}, {% endfor %}],
+            data: [{% for age, count in age_counts.items %} {{ count }}, {% endfor %}],
             backgroundColor: [
                 '#FF6384', '#36A2EB', '#FFCE56', '#2ecc71', '#e74c3c', '#3498db', '#9b59b6', '#34495e'],
             borderColor: [
@@ -352,14 +352,14 @@ var myChart1 = new Chart(ctxw, {
         }
     }
 });
-// const ctx = document.getElementById('sex').getContext('2d');
-// var myChart1 = new Chart(ctx, {
-//     type: 'bar',
+// const ctxw = document.getElementById('wilaya').getContext('2d');
+// var myChart1 = new Chart(ctxw, {
+//     type: 'pie',
 //     data: {
-//         labels: [{% for sex, count in sex_counts.items %} '{{ sex }}', {% endfor %}],
+//         labels: [{% for wilaya, count in wilaya_counts.items %} '{{ wilaya }}', {% endfor %}],
 //         datasets: [{
 //             label: 'Diagramme de vaccination',
-//             data: [{% for sex, count in sex_counts.items %} {{ count }}, {% endfor %}],
+//             data: [{% for wilaya, count in wilaya_counts.items %} {{ count }}, {% endfor %}],
 //             backgroundColor: [
 //                 '#FF6384', '#36A2EB', '#FFCE56', '#2ecc71', '#e74c3c', '#3498db', '#9b59b6', '#34495e'],
 //             borderColor: [
@@ -408,6 +408,7 @@ var myChart1 = new Chart(ctxw, {
 //         }
 //     }
 // });
+
 // const ctx = document.getElementById('sex').getContext('2d');
 // var myChart1 = new Chart(ctx, {
 //     type: 'bar',

@@ -17,5 +17,6 @@ admin.site.register(Profile)
 admin.site.register(Patient)
 admin.site.register(Vaccination)
 admin.site.register(Vaccin_Dose)
+admin.site.register(CertificatVaccination)
 
 

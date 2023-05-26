@@ -3,11 +3,12 @@
 {% block content %}
     <div class="container">
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-12">
             <h2 class="text-center">Carte des centres de vaccination</h2>
             <div id="mapid" style="height: 400px;"></div>
+            <!-- style="height: 400px;" -->
           </div>
-          <div class="col-md-6">
+          <!-- <div class="col-md-6">
             <h2 class="text-center">Liste des centres de vaccination</h2>
             <ul class="list-group">
               {% for centre in centres %}
@@ -20,21 +21,37 @@
                 <li>Aucun centre de vaccination trouvé</li>
               {% endfor %}
             </ul>
-          </div>
+          </div> -->
         </div>
       </div>
 {% block custom_js %}
-      <script>
-       var map = L.map('mapid').setView([20.2606, -10.3631], 6);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-    
-        {% for centre in centres %}
-          L.marker([{{ centre.latitude }}, {{ centre.longitude }}]).addTo(map)
-            .bindPopup("<b>{{ centre.nom }}</b><br>{{ centre.moughataa.wilaya }}<br>{{ centre.moughataa }}");
-        {% endfor %}
-      </script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7iU-ErVpTKuucu5uUi59Nqp0w7WNO4eA&libraries=places&callback=initMap"></script>
+<script>
+  function initMap() {
+    var mapOptions = {
+      zoom: 6,
+      center: {lat: 20.2606, lng: -10.3631}
+    };
+  
+    var map = new google.maps.Map(document.getElementById('mapid'), mapOptions);
+  
+    {% for centre in centres %}
+  var marker{{ forloop.counter }} = new google.maps.Marker({
+    position: {lat: {{ centre.latitude }}, lng: {{ centre.longitude }}},
+    map: map,
+    title: '{{ centre.nom }}'
+  });
+
+  var infowindow{{ forloop.counter }} = new google.maps.InfoWindow({
+    content: '<b>Centre: {{ centre.nom }}</b><br>Moughataa: {{ centre.moughataa.wilaya }}<br>'
+  });
+
+  marker{{ forloop.counter }}.addListener('click', function() {
+    infowindow{{ forloop.counter }}.open(map, marker{{ forloop.counter }});
+  });
+{% endfor %}
+  }
+  </script>
       {% endblock custom_js %}
     
 {% endblock %}

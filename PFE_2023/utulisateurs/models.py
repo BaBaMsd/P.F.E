@@ -197,6 +197,9 @@ class Patient(models.Model):
     nni = models.BigIntegerField(unique=True)
     sexe = models.CharField(max_length=20, choices=SEXE)
 
+    def __str__(self):
+        return f'{self.nom} {self.prenom}'
+
 
 class Vaccination(models.Model):
     STATUS=[
@@ -230,6 +233,9 @@ class Vaccination(models.Model):
 
         super(Vaccination, self).save(*args,**kwargs)
 
+    def __str__(self):
+        return f'{self.patient.nom}-{self.vaccine.type.nom}-{self.vaccine.nom}'
+
 @receiver(pre_save, sender=Vaccination)
 def changeStatus(sender, instance,*args, **kwargs):
     if instance.dose_administré == instance.dose_number:
@@ -247,17 +253,74 @@ def changeStatus(sender, instance,*args, **kwargs):
         img.save(buffer, format='PNG')
         instance.qr_code.save(f"{instance.patient.nom}-vaccination-qr-code.png", File(buffer), save=False)
 
+        # générer_certificat_vaccination(instance)
         
 class Vaccin_Dose(models.Model):
     vaccination = models.ForeignKey(Vaccination, on_delete=models.CASCADE)
-    date_dose = models.DateField()
-    numeroDose = models.IntegerField()
-    vaccins = models.ForeignKey(Vaccine, on_delete=models.CASCADE)
-    centre = models.ForeignKey(CentreDeVaccination, on_delete=models.CASCADE)
-    numeroLot = models.CharField(max_length=50)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    vaccin = models.ForeignKey(Vaccine, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.patient.nom} {self.vaccin.nom}'
 
 
+@receiver(post_save, sender=Vaccination)
+def SaveDose(sender, instance, created, **kwargs):  
+    if created:
+        Vaccin_Dose.objects.create(
+            vaccination=instance,
+            patient=instance.patient,
+            vaccin=instance.vaccine       
+        )
+        
 
 
+#-----------------certificat-----------------#
+class CertificatVaccination(models.Model):
+    id_certificat = models.CharField(max_length=10, unique=True)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    vaccin = models.ForeignKey(Vaccine, on_delete=models.CASCADE)
+    date_delivration = models.DateField()
+    valide = models.BooleanField(default=False)
+    doses = models.ManyToManyField(Vaccin_Dose)
+    # Autres champs pertinents pour le certificat
+
+    def __str__(self):
+        return f'{self.patient.nom} {self.id_certificat}'
+
+    
+    def get_available_doses(self):
+        return Vaccin_Dose.objects.filter(patient=self.patient, vaccin=self.vaccin)
+
+import random
+
+def générer_id_certificat():
+    hex_chars = '0123456789ABCDEF'
+    return ''.join(random.choice(hex_chars) for _ in range(10))
 
 
+def générer_certificat_vaccination(vaccination):
+    patient = vaccination.patient
+    vaccin = vaccination.vaccine
+
+    if vaccination.dose_administré == vaccin.total_doses:     
+        certificat = CertificatVaccination.objects.create(
+            id_certificat=générer_id_certificat(),
+            patient=patient,
+            vaccin=vaccin,
+            date_delivration=vaccination.date_darnier_dose,
+            valide=True
+        )
+
+        dosesVaccination = Vaccin_Dose.objects.filter(vaccination__id=vaccination.id)
+        
+        certificat.doses.clear()
+
+        for i in dosesVaccination:
+            certificat.doses.add(i)
+
+        certificat.save()
+
+        print('ok')
+        
+        # Autres actions pour générer le certificat (par exemple, génération de fichier PDF, envoi par email, etc.)
