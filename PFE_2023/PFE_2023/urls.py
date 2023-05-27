@@ -19,6 +19,8 @@ urlpatterns = [
     path('', auth.login , name='login'),
     path('profile/', auth.profile, name='profile'),
     path('vaccination_complementaire/', vaccination_complementaire, name='vaccination_complementaire'),
+    path('vaccination_certificat/', vaccination_certificat, name='vaccination_certificat'),
+
     path('accueil/<int:id>/', accueil, name='accueil'),
     path('ac/', ac, name='ac'),
     path('centres/', centres, name='centres'),

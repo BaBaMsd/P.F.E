@@ -252,3 +252,10 @@ class Complemantaire_V(forms.Form):
     class Meta:
         model = Patient
         fields = [ 'nni']
+
+class ID_crf(forms.Form):
+    Id = forms.CharField(label='ID Certificat',widget=forms.TextInput(attrs={'class':'form-control col-6 my-2','name':'nni'}))
+
+    class Meta:
+        model = CentreDeVaccination
+        fields = [ 'id_certificat']

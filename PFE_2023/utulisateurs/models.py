@@ -253,7 +253,7 @@ def changeStatus(sender, instance,*args, **kwargs):
         img.save(buffer, format='PNG')
         instance.qr_code.save(f"{instance.patient.nom}-vaccination-qr-code.png", File(buffer), save=False)
 
-        # générer_certificat_vaccination(instance)
+        générer_certificat_vaccination(instance)
         
 class Vaccin_Dose(models.Model):
     vaccination = models.ForeignKey(Vaccination, on_delete=models.CASCADE)
@@ -282,15 +282,11 @@ class CertificatVaccination(models.Model):
     vaccin = models.ForeignKey(Vaccine, on_delete=models.CASCADE)
     date_delivration = models.DateField()
     valide = models.BooleanField(default=False)
-    doses = models.ManyToManyField(Vaccin_Dose)
+    # doses = models.ManyToManyField(Vaccin_Dose)
     # Autres champs pertinents pour le certificat
 
     def __str__(self):
         return f'{self.patient.nom} {self.id_certificat}'
-
-    
-    def get_available_doses(self):
-        return Vaccin_Dose.objects.filter(patient=self.patient, vaccin=self.vaccin)
 
 import random
 
@@ -312,14 +308,6 @@ def générer_certificat_vaccination(vaccination):
             valide=True
         )
 
-        dosesVaccination = Vaccin_Dose.objects.filter(vaccination__id=vaccination.id)
-        
-        certificat.doses.clear()
-
-        for i in dosesVaccination:
-            certificat.doses.add(i)
-
-        certificat.save()
 
         print('ok')
         

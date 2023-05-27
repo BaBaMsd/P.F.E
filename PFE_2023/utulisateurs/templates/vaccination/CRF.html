@@ -14,14 +14,28 @@
         <div class="card col-md-12">
             <div class="card-body">
                     <div class="">
-                        <center> <h3> بطاقة تلقيح</h3> </center>
-                       <center> <h3>CARTE DE VACCINATION </h3> </center>
-                       <center><h4>{{ cr.vaccine.type.nom }}</h4></center>
+                        <center> <h5> {{ id_certificat.vaccin.type.nom }} شهادة تلقيح ضد</h5> </center>
+                       <center> <h5>Certificat de vaccination contre {{ id_certificat.vaccin.type.nom }}</h5> </center>
                     </div>                    
                     <hr>
                     <table class="table table-borderless">
                         <tbody>
-                          <tr style="font-size: 18px;">
+                            <tr style="font-size: 18px;">
+                                <td style="text-decoration: underline;">Information Certificats</td>
+                                <td></td>
+                                <td style="text-align: right;">معلومات الشهادة</td>
+                              </tr>
+                              <tr style="font-size: 18px;">
+                                <td>ID certificat:</td>
+                                <td> {{ id_certificat.id_certificat}}</td>
+                                <td style="text-align: right;">رقم الشهادة</td>
+                              </tr>
+                              <tr style="font-size: 18px;">
+                                <td>Date du certificat:</td>
+                                <td> {{ id_certificat.date_delivration|date:"d/m/Y"}}</td>
+                                <td style="text-align: right;">تاريخ الشهادة</td>
+                              </tr>
+                          <!-- <tr style="font-size: 18px;">
                             <td>Wilaya: {{ cr.center.moughataa.wilaya.nom}}</td>
                             <td style="text-align: right;">الولاىة</td>
                           </tr>
@@ -67,7 +81,7 @@
                               <td>ID Certificat: {{ id_certificat.id_certificat }}</td>
                             {% endif%}
                             <td></td>
-                          </tr>
+                          </tr> -->
                         </tbody>
                       </table>
                     

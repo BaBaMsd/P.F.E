@@ -382,26 +382,8 @@ def add_vaccination(request):
                 vaccination_p.patient = patient
                 vaccination_p.save()
                 certificat = Vaccination.objects.latest('id')
-
-                if certificat.dose_administré == certificat.vaccine.total_doses:
-                    CF = CertificatVaccination()
-                    CF.id_certificat = générer_id_certificat()
-                    CF.patient = patient
-                    CF.vaccin = vaccine
-                    CF.date_delivration = datetime.now().strftime('%Y-%m-%d')
-                    CF.valide = True
-                    CF.save()
-
-                    VD = Vaccin_Dose.objects.filter(patient=CF.patient, vaccin=CF.vaccin)
-                    CF.doses.clear()
-                    CF.doses.set(VD)
                 
                 id_certificat =  CertificatVaccination.objects.get(patient=certificat.patient)
-                id_certificat.doses.clear()
-                VD = Vaccin_Dose.objects.filter(patient=CF.patient, vaccin=CF.vaccin)
-                id_certificat.doses.set(VD)
-                id_certificat.save()
-
                 context = {
                     'cr': certificat,
                     'id_certificat': id_certificat
@@ -415,6 +397,28 @@ def add_vaccination(request):
     stock_data = StockVaccins.objects.filter(centerVaccination=center).distinct('vaccine')
 
     return render(request, 'vaccination/vaccinationForm.html', {'stock_data':stock_data})
+
+def vaccination_certificat(request):
+    if request.method == 'POST':
+        form = ID_crf(request.POST)
+        if form.is_valid():
+            ID = form.cleaned_data['Id']
+            if CertificatVaccination.objects.filter(id_certificat=ID).exists():
+                id_certificat =  CertificatVaccination.objects.get(id_certificat=ID)
+                Dose = Vaccin_Dose.objects.filter(patient=id_certificat.patient,vaccin=id_certificat.vaccin)
+                context = {
+                    'Dose':Dose,
+                    'id_certificat': id_certificat
+                }
+                return render(request, 'vaccination/CRF.html', context)
+            else:
+                messages.error(request,'N\'exist pas ')
+                return redirect('vaccination_certificat')
+        else:
+            return redirect('vaccination_certificat')
+    else:
+        form = ID_crf()
+        return render(request, 'vaccination/vaccination_certificat.html', {'form':form})
 
 
 def vaccination_complementaire(request):
@@ -435,19 +439,7 @@ def vaccination_complementaire(request):
                 dose.vaccination=certificats
                 dose.patient=certificats.patient
                 dose.vaccin=certificats.vaccine
-                dose.save()
-                if certificats.dose_administré == certificats.vaccine.total_doses:
-                    CF = CertificatVaccination()
-                    CF.id_certificat=générer_id_certificat(),
-                    CF.patient=certificats.patient,
-                    CF.vaccin=certificats.vaccine,
-                    CF.date_delivration=certificats.date_darnier_dose,
-                    CF.valide=True
-                    VD = Vaccin_Dose.objects.filter(vaccination__id=certificats.id, patien=certificats.patient,vaccin=certificats.vaccine)
-                    for i in VD:
-                        CF.doses.add(i)
-                    CF.save()
-                
+                dose.save()               
                 id_certificat =  CertificatVaccination.objects.get(patient=certificats.patient)
                 context = {
                         'cr': certificats,
