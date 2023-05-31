@@ -21,69 +21,49 @@
                     <table class="table table-borderless">
                         <tbody>
                             <tr style="font-size: 18px;">
-                                <td style="text-decoration: underline;">Information Certificats</td>
+                                <td ><span style="text-decoration: underline;">Information Certificats</span><br />ID certificat:<br />Date du certificat:</td>
+                                <td><br />{{ id_certificat.id_certificat}}<br />{{ id_certificat.date_delivration|date:"d/m/Y"}}</td>
+                                <td style="text-align: right; font-size: 17px;"> <span style="text-decoration: underline;">معلومات الشهادة</span><br />رقم الشهادة<br />تاريخ الشهادة</td>
+                              </tr>
+                              <tr style="font-size: 18px;">
+                                <td ><span style="text-decoration: underline;">Personne vacciné</span><br />Nom: {{ id_certificat.patient.nom }} {{ id_certificat.patient.prenom }}<br />N.N.I:<br />Date de naissance</td>
+                                <td><br /><br />{{ id_certificat.patient.nni}}<br />{{ id_certificat.patient.dateNaissance|date:"d/m/Y"}}</td>
+                                <td style="text-align: right; font-size: 17px;"> <span style="text-decoration: underline;">الشخص المطعم</span><br />الإسم<br />ر.و.ت<br />تاريخ الميلاد</td>
+                              </tr>
+                              {% if Dose %}
+                              <tr style="font-size: 18px;">
+                                <td ><span style="text-decoration: underline;">Injections / Centre</span><br />
+      
+                                    {% for i in Dose %}
+                                    Dose : {{ i.vaccin.total_doses}}/{{ forloop.counter}}<br />
+                                    Vaccin : {{ i.vaccin.nom}}<br />
+                                    Centre : {{ i.vaccination.center.nom}}<br />
+                                    Date : {{ i.vaccination.date_darnier_dose|date:"d/m/Y"}}
+                                    <br />
+                                    <br />
+                                    {% endfor %}  
+                                    <img src="{{ id_certificat.qr_code.url}}" width="200" height="200">
+                                </td>
+
                                 <td></td>
-                                <td style="text-align: right;">معلومات الشهادة</td>
+                                <td style="text-align: right; font-size: 17px;"> <span style="text-decoration: underline;">الجرعات \ المراكز</span><br />
+                                  {% for i in Dose %}
+                                  الجرعة<br />
+                                 التلقيح<br />
+                                  المركز<br />
+                                  التاريخ
+                                  <br />
+                                  <br />
+                                  {% endfor %}      
+                                </td>
                               </tr>
-                              <tr style="font-size: 18px;">
-                                <td>ID certificat:</td>
-                                <td> {{ id_certificat.id_certificat}}</td>
-                                <td style="text-align: right;">رقم الشهادة</td>
-                              </tr>
-                              <tr style="font-size: 18px;">
-                                <td>Date du certificat:</td>
-                                <td> {{ id_certificat.date_delivration|date:"d/m/Y"}}</td>
-                                <td style="text-align: right;">تاريخ الشهادة</td>
-                              </tr>
-                          <!-- <tr style="font-size: 18px;">
-                            <td>Wilaya: {{ cr.center.moughataa.wilaya.nom}}</td>
-                            <td style="text-align: right;">الولاىة</td>
-                          </tr>
-                          <tr style="font-size: 18px;">
-                            <td>Moughataa: {{ cr.center.moughataa.nom}}</td>
-                            <td style="text-align: right;">المقاطعة</td>
-                          </tr>
-                          <tr style="font-size: 18px;">
-                            <td>Nom Complet: {{ cr.patient.nom}}</td>
-                            <td style="text-align: right;">الإسم الكامل</td>
-                          </tr>
-                          <tr style="font-size: 18px;">
-                            <td>NNI: {{ cr.patient.nni}}</td>
-                            <td style="text-align: right;">الرقم الوطني</td>
-                          </tr>
-                          <tr style="font-size: 18px;">
-                            <td>Date de Naisence: {{ cr.patient.dateNaissance|date:"d/m/Y"}}</td>
-                            <td style="text-align: right;">تاريخ الميلاد</td>
-                          </tr>
-                          
-                          <tr style="font-size: 18px;">
-                            <td>Dose: {{ cr.dose_administré}}/{{ cr.vaccine.total_doses}}</td>
-                            <td style="text-align: right;">الجرعة</td>
-                          </tr>
-                          <tr style="font-size: 18px;">
-                            <td>Vaccin: {{ cr.vaccine.nom}}</td>
-                            <td style="text-align: right;">اللقاح</td>
-                          </tr>
-                          <tr style="font-size: 18px;">
-                            <td>Centre: {{ cr.center.nom}}</td>
-                            <td style="text-align: right;">المركز</td>
-                          </tr>
-                          <tr style="font-size: 18px;">
-                            <td>Date: {{ cr.date_darnier_dose|date:"d/m/Y"}}</td>
-                            <td style="text-align: right;">التاريخ</td>
-                          </tr>
-                          <tr>
-                            <td><img src="{{ cr.qr_code.url}}" width="200" height="200"></td>
-                            <td></td>
-                          </tr>
-                          <tr style="font-size: 18px;">
-                            {% if id_certificat %}
-                              <td>ID Certificat: {{ id_certificat.id_certificat }}</td>
-                            {% endif%}
-                            <td></td>
-                          </tr> -->
+                              {% endif %}
+  
                         </tbody>
                       </table>
+                      
+                      <p><span style="font-size: 17px;"">إمسح الرمز للتحقق من المعلومات</span><br />Scanner ce QR code pour vérifier les information</p>
+
                     
             </div>
         </div>

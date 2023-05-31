@@ -64,9 +64,7 @@ def create_profile(sender, instance, created, **kwargs):
         Profile.objects.create(user=instance)
 
 class Wilaya(models.Model):
-    nom = models.CharField(max_length=50)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    
+    nom = models.CharField(max_length=50)    
     def __str__(self):
         return self.nom
 
@@ -242,6 +240,8 @@ def changeStatus(sender, instance,*args, **kwargs):
         instance.status = 'validé'
         data = f"Nom: {instance.patient.nom} {instance.patient.prenom}\nCenter: {instance.center.nom}\nMoughataa: {instance.center.moughataa}\nType vaccine: {instance.vaccine.type.nom}\nVaccine: {instance.vaccine.nom}\nTotal doses: {instance.dose_number}\nDoses administré: {instance.dose_administré}\nDate darnier dose: {instance.date_darnier_dose}\nStatus: {instance.status}"
 
+        générer_certificat_vaccination(instance)
+
         # Generate QR code image
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
         qr.add_data(data)
@@ -253,7 +253,7 @@ def changeStatus(sender, instance,*args, **kwargs):
         img.save(buffer, format='PNG')
         instance.qr_code.save(f"{instance.patient.nom}-vaccination-qr-code.png", File(buffer), save=False)
 
-        générer_certificat_vaccination(instance)
+        
         
 class Vaccin_Dose(models.Model):
     vaccination = models.ForeignKey(Vaccination, on_delete=models.CASCADE)
@@ -272,6 +272,8 @@ def SaveDose(sender, instance, created, **kwargs):
             patient=instance.patient,
             vaccin=instance.vaccine       
         )
+    # if instance.dose_administré == instance.dose_number:
+    #     générer_certificat_vaccination(instance)
         
 
 
@@ -282,8 +284,26 @@ class CertificatVaccination(models.Model):
     vaccin = models.ForeignKey(Vaccine, on_delete=models.CASCADE)
     date_delivration = models.DateField()
     valide = models.BooleanField(default=False)
-    # doses = models.ManyToManyField(Vaccin_Dose)
-    # Autres champs pertinents pour le certificat
+    # vaccination = models.ForeignKey(Vaccination, on_delete=models.CASCADE)
+    qr_code = models.ImageField(upload_to='vaccination_qr_codes/', blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        # Generate QR code data
+        data = f"Certificat Informations\nID certificat: {self.id_certificat}\nDate: {self.date_delivration}\nPersonne vacciné\nNom: {self.patient.nom} {self.patient.prenom}\nDate Naissance: {self.patient.dateNaissance}\nType vaccine: {self.vaccin.type.nom}\nVaccin: {self.vaccin.nom}\nTotal doses: {self.vaccin.total_doses}/{self.vaccin.total_doses}\n"
+
+        # Generate QR code image
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(data)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+
+        # Save QR code image to field
+        buffer = BytesIO()
+        img.save(buffer, format='PNG')
+        self.qr_code.save(f"{self.patient.nom}-certificat-qr-code.png", File(buffer), save=False)
+
+        super(CertificatVaccination, self).save(*args,**kwargs)
+
 
     def __str__(self):
         return f'{self.patient.nom} {self.id_certificat}'
@@ -305,7 +325,8 @@ def générer_certificat_vaccination(vaccination):
             patient=patient,
             vaccin=vaccin,
             date_delivration=vaccination.date_darnier_dose,
-            valide=True
+            valide=True,
+            # vaccination=vaccination
         )
 
 

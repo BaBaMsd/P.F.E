@@ -332,10 +332,10 @@ def add_vaccination(request):
         elif Patient.objects.filter(nni=request.POST['nni']).exists():
             patient_av = Patient.objects.get(nni=request.POST['nni'])
             vaccination = Vaccination()
-            vaccination.patient = patient_av,
-            vaccination.vaccine=vaccine,
-            vaccination.dose_number =vaccine.total_doses,
-            vaccination.center = center.center,         
+            vaccination.patient = patient_av
+            vaccination.vaccine=vaccine
+            vaccination.dose_number =vaccine.total_doses
+            vaccination.center = center     
             vaccination.date_darnier_dose = datetime.now().strftime('%Y-%m-%d')
         
             stockage = StockVaccins.objects.filter(vaccine=vaccine,
@@ -347,47 +347,63 @@ def add_vaccination(request):
                 stockage.quantite = stockage.quantite - vaccine.doses_administrées
                 stockage.save()
                 vaccination.save()
-               
-                certificat = Vaccination.objects.latest('id')
-                context = {
-                    'cr': certificat,
-                    'stockage': stockage
-                }
+                certificat = Vaccination.objects.get(patient=patient)
+                if CertificatVaccination.objects.filter(patient=certificat.patient).exists():
+                    id_certificat =  CertificatVaccination.objects.get(patient=certificat.patient)
+                    context = {
+                        'cr': certificat,
+                        'id_certificat': id_certificat
+                    }
+                else:
+                    context = {
+                        'cr': certificat
+                    }
                 return render(request, 'vaccination/certificat.html', context)
             else:
                 messages.error(request, 'Quantité insuffisante en stock pour vacciner.')
         else:
+                # Création de l'objet Patient
             patient = Patient()
-            vaccination_p = Vaccination()
             patient.nom = request.POST['nom']
             patient.prenom = request.POST['prenom']
             patient.nni = request.POST['nni']
             patient.sexe = request.POST['sexe']
             patient.dateNaissance = request.POST['dateNaissence']
-         
-            vaccination_p.vaccine=vaccine
-            vaccination_p.dose_number =vaccine.total_doses
-            vaccination_p.center = center         
-            vaccination_p.date_darnier_dose = datetime.now().strftime('%Y-%m-%d')
+            
 
-            stockage = StockVaccins.objects.filter(vaccine=vaccine,
-            centerVaccination=center,
-            dateExpiration__gte=datetime.today(),
-            quantite__gte=vaccine.doses_administrées
+            # Création de l'objet Vaccination
+            vaccination_p = Vaccination()
+            vaccination_p.vaccine = vaccine
+            vaccination_p.dose_number = vaccine.total_doses
+            vaccination_p.center = center
+            vaccination_p.date_dernier_dose = datetime.now().strftime('%Y-%m-%d')
+            
+
+            # Mise à jour de l'objet StockVaccins
+            stockage = StockVaccins.objects.filter(
+                vaccine=vaccine,
+                centerVaccination=center,
+                dateExpiration__gte=datetime.today(),
+                quantite__gte=vaccine.doses_administrées
             ).order_by('dateExpiration').first()
+
             if stockage:
                 stockage.quantite = stockage.quantite - vaccine.doses_administrées
                 stockage.save()
                 patient.save()
                 vaccination_p.patient = patient
                 vaccination_p.save()
-                certificat = Vaccination.objects.latest('id')
-                
-                id_certificat =  CertificatVaccination.objects.get(patient=certificat.patient)
-                context = {
-                    'cr': certificat,
-                    'id_certificat': id_certificat
-                }
+                certificat = Vaccination.objects.get(patient=patient)
+                if CertificatVaccination.objects.filter(patient=certificat.patient).exists():
+                    id_certificat =  CertificatVaccination.objects.get(patient=certificat.patient)
+                    context = {
+                        'cr': certificat,
+                        'id_certificat': id_certificat
+                    }
+                else:
+                    context = {
+                        'cr': certificat
+                    }
                 return render(request, 'vaccination/certificat.html', context)
             else:
                 messages.error(request, 'Quantité insuffisante en stock pour vacciner.')
@@ -426,26 +442,37 @@ def vaccination_complementaire(request):
         form = Complemantaire_V(request.POST)
         if form.is_valid():
             nni = form.cleaned_data['nni']
-            if Patient.objects.filter(nni=nni).exists():   
+            if Patient.objects.filter(nni=nni).exists(): 
                 patien = Patient.objects.get(nni=nni)   
                 certificats = Vaccination.objects.get(patient=patien)
-                admin = AdminCenter.objects.get(user=request.user)
-                center=admin.center
-                certificats.dose_administré += 1    
-                certificats.date_darnier_dose = datetime.today()
-                certificats.center=center
-                certificats.save()
-                dose = Vaccin_Dose()
-                dose.vaccination=certificats
-                dose.patient=certificats.patient
-                dose.vaccin=certificats.vaccine
-                dose.save()               
-                id_certificat =  CertificatVaccination.objects.get(patient=certificats.patient)
-                context = {
-                        'cr': certificats,
-                        'id_certificat': id_certificat
+                if Dose.objects.filter(vaccine=certificats.vaccine).exists:
+                    dure = Dose.objects.filter(vaccine=certificats.vaccine)
+                    for i in dure:
+                        if i.number == certificats.dose_administré and i.durée > certificats.date_darnier_dose - date.today():
+                            messages.error(request, 'Imposible de prendre ce dose avant que le duree est fini')
+                            return redirect('vaccination_complementaire')
+                    admin = AdminCenter.objects.get(user=request.user)
+                    center=admin.center
+                    certificats.dose_administré += 1    
+                    certificats.date_darnier_dose = datetime.today()
+                    certificats.center=center
+                    certificats.save()
+                    dose = Vaccin_Dose()
+                    dose.vaccination=certificats
+                    dose.patient=certificats.patient
+                    dose.vaccin=certificats.vaccine
+                    dose.save()               
+                    id_certificat =  CertificatVaccination.objects.get(patient=certificats.patient)
+                    context = {
+                                'cr': certificats,
+                                'id_certificat': id_certificat
                     }
-                return render(request, 'vaccination/certificat.html', context)
+                    return render(request, 'vaccination/certificat.html', context)
+                            
+                else:
+                    messages.error(request, 'Ce vaccin a un seul dose ok!')
+                    return redirect('vaccination_complementaire')
+                
             else:
                 messages.error(request, 'Ce NNI ne corespond pas a un patient')
                 return redirect('vaccination_complementaire')
