@@ -18,7 +18,9 @@ urlpatterns = [
     path('register/', auth.register, name='register'),
     path('', auth.login , name='login'),
     path('profile/', auth.profile, name='profile'),
-    path('vaccination_complementaire/', vaccination_complementaire, name='vaccination_complementaire'),
+
+    path('vaccination_complementaire/<int:id>/', vaccination_complementaire, name='vaccination_complementaire'),
+    path('vaccins/', vaccins, name='vaccins'),
     path('vaccination_certificat/', vaccination_certificat, name='vaccination_certificat'),
 
     path('accueil/<int:id>/', accueil, name='accueil'),
@@ -28,7 +30,9 @@ urlpatterns = [
     path('historique_stock/', historique_stock, name='historique_stock'),
     path('logout/', auth_views.LogoutView.as_view(template_name='registration/logout.html'), name='logout'),
     path('add_vaccine/', add_vaccine, name='add_vaccine'),
-    path('add_vaccination/', add_vaccination, name='add_vaccination'),
+    path('add_type/', add_type, name='add_type'),
+    path('choix_vaccination/', choix_vaccination, name='choix_vaccination'),
+    path('add_vaccination/<int:id>/', add_vaccination, name='add_vaccination'),
     path('vaccination_type/', vaccination_type, name='vaccination_type'),
     path("changePassMot/", auth.changePassMot,name = "changePassMot"), 
     path('liste_vaccine/', liste_vaccine, name='liste_vaccine'),

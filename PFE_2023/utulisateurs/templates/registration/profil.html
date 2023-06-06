@@ -7,9 +7,11 @@
         <div class="media-body">
           <h2 class="account-heading">Profile Information</h2>
           <h5 class="fontawesome-free">{{ user.email }}</h5>
+          <h6 class="">{{ user.phone_number }}</h6>
           <div class="text-end"> <a href="{% url 'changePassMot' %}" type="button" class="btn btn-primary">Changer-Mot-passe</a>
           </div>
           <hr>
+    
         </div>
       </div>
       <form method="POST" enctype="multipart/form-data">
@@ -19,7 +21,7 @@
               {{ p_form.as_p }}
           </fieldset>
           <div class="form-group">
-              <button class="btn btn-outline-info" type="submit">Modifier</button>
+              <button class="btn btn-primary" type="submit">Modifier</button>
           </div>
       </form>
     </div>

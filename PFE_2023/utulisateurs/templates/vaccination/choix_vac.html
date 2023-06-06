@@ -1,0 +1,15 @@
+{% extends "main_app/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block content %}
+ <div class="container">
+ <div class="py-3 px-3">
+    
+        {% for i in tps%}
+    
+        <a href="{% url 'add_vaccination' i.id %}" class="btn btn-primary px-4">{{ i.nom}}</a>
+  
+        {% endfor%}
+ </div>
+
+ {% endblock %}

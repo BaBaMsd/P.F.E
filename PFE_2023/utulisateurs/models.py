@@ -314,7 +314,7 @@ def générer_id_certificat():
     hex_chars = '0123456789ABCDEF'
     return ''.join(random.choice(hex_chars) for _ in range(10))
 
-
+from datetime import date
 def générer_certificat_vaccination(vaccination):
     patient = vaccination.patient
     vaccin = vaccination.vaccine
@@ -324,7 +324,7 @@ def générer_certificat_vaccination(vaccination):
             id_certificat=générer_id_certificat(),
             patient=patient,
             vaccin=vaccin,
-            date_delivration=vaccination.date_darnier_dose,
+            date_delivration= date.today(),
             valide=True,
             # vaccination=vaccination
         )

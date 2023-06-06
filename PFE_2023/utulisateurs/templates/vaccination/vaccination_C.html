@@ -6,7 +6,10 @@
     <h5>Vaccination-complementaire</h5>
     <form method="POST">
         {% csrf_token %}
-        {{ form.as_p }}
+        <div class="form-group">
+            <label for="nni">N.N.I</label>
+            <input type="number" class="form-control input-group mb-3 col-6" id="nni" name="nni" required>
+          </div>
         <button type="submit" class="btn btn-outline-info mb-4">Chercher</button>
     </form> 
 </div>

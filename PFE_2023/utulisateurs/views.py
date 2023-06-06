@@ -14,6 +14,8 @@ from datetime import date
 from django.shortcuts import render, redirect
 from .forms import VaccineForm , DoseForm 
 from .models import Dose, Vaccine
+from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 
 @login_required
 #@user_passes_test(lambda u: u.role == 'directeur-regional')
@@ -28,13 +30,18 @@ def addCenterForm(request):
         form = AddCenterForm()
 
     return render(request, 'addCenterForm.html', {'form': form})
+
 @login_required
 def ac(request):
     type_vaccination = TypeVaccination.objects.all()
-    idtp = type_vaccination[0].id   
+    if type_vaccination.exists():
+        idtp = type_vaccination[0].id  
+    else:
+        return render(request, 'aucun_donnes.html') 
     
     return redirect('accueil', id=idtp)
 
+@login_required
 def accueil(request, id):
     type_v = TypeVaccination.objects.get(id=id)
     if request.user.role == 'responsable-center' or request.user.role == 'gerent-stock' or request.user.role == 'professionnel':
@@ -150,7 +157,7 @@ def accueil(request, id):
     return render(request, 'accueil.html',context)
 
 
-
+@login_required
 def centres(request):
     centres = CentreDeVaccination.objects.all()
     return render(request, 'centres.html',{'centres': centres})
@@ -164,7 +171,19 @@ def liste_vaccine(request):
 
 #<--------------------vaccinsDose----------->
 
-
+def add_type(request):
+    if request.method == 'POST':
+        f = Vac_type(request.POST)
+        if f.is_valid():
+            f.save()
+            messages.success(request, 'Nouveau type a ajouter')
+            return redirect('add_type')
+        else:
+            messages.error(request, 'Les données ne sont pas valid!')
+            return redirect('add_type')
+    else:
+        form = Vac_type()
+    return render(request, 'vaccin_type.html', {'form': form})
 
 @login_required
 def add_vaccine(request):
@@ -317,14 +336,51 @@ def générer_id_certificat():
     return ''.join(random.choice(hex_chars) for _ in range(10))
 
 
+def vaccination_certificat(request):
+    if request.method == 'POST':
+        form = ID_crf(request.POST)
+        if form.is_valid():
+            ID = form.cleaned_data['Id']
+            if CertificatVaccination.objects.filter(id_certificat=ID).exists():
+                id_certificat =  CertificatVaccination.objects.get(id_certificat=ID)
+                Dose = Vaccin_Dose.objects.filter(patient=id_certificat.patient,vaccin=id_certificat.vaccin)
+                context = {
+                    'Dose':Dose,
+                    'id_certificat': id_certificat
+                }
+                return render(request, 'vaccination/CRF.html', context)
+            else:
+                messages.error(request,'N\'exist pas ')
+                return redirect('vaccination_certificat')
+        else:
+            return redirect('vaccination_certificat')
+    else:
+        form = ID_crf()
+        return render(request, 'vaccination/vaccination_certificat.html', {'form':form})
+
 @login_required
 @user_passes_test(lambda u: u.role in ['responsable-center', 'professionnel'])
-def add_vaccination(request):
+
+def choix_vaccination(request):
+    # tps = TypeVaccination.objects.all()
+    type_vaccination = TypeVaccination.objects.all()
+    if type_vaccination.exists():
+        idtp = type_vaccination[0].id  
+    else:
+        return render(request, 'aucun_donnes.html') 
     
+    return redirect('add_vaccination', id=idtp)
+
+@login_required
+@user_passes_test(lambda u: u.role in ['responsable-center', 'professionnel'])
+def add_vaccination(request, id):
     if request.method == 'POST':
         centerAdmin = AdminCenter.objects.get(user=request.user)
         center = CentreDeVaccination.objects.get(id=centerAdmin.center.id)
         vaccine = Vaccine.objects.get(id=request.POST['vaccine'])
+        if vaccine.type.categorie == 'jeunes-femmes' and request.POST['sexe'] == 'Homme':
+            messages.error(request, "Cette vaccination est specifique pour les femmes!")       
+            return redirect('add_vaccination')
         if Vaccination.objects.filter(patient__nni=request.POST['nni'],vaccine__type=vaccine.type).exists():
             print('exist')
             messages.error(request, "Ce patient a déja pris cette vaccination!")
@@ -333,10 +389,10 @@ def add_vaccination(request):
             patient_av = Patient.objects.get(nni=request.POST['nni'])
             vaccination = Vaccination()
             vaccination.patient = patient_av
-            vaccination.vaccine=vaccine
-            vaccination.dose_number =vaccine.total_doses
+            vaccination.vaccine = vaccine
+            vaccination.dose_number = vaccine.total_doses
             vaccination.center = center     
-            vaccination.date_darnier_dose = datetime.now().strftime('%Y-%m-%d')
+            vaccination.date_darnier_dose = date.today()
         
             stockage = StockVaccins.objects.filter(vaccine=vaccine,
             centerVaccination=center,
@@ -347,9 +403,9 @@ def add_vaccination(request):
                 stockage.quantite = stockage.quantite - vaccine.doses_administrées
                 stockage.save()
                 vaccination.save()
-                certificat = Vaccination.objects.get(patient=patient)
-                if CertificatVaccination.objects.filter(patient=certificat.patient).exists():
-                    id_certificat =  CertificatVaccination.objects.get(patient=certificat.patient)
+                # certificat = Vaccination.objects.get(patient=patient)
+                if CertificatVaccination.objects.filter(patient=patient_av , vaccin=vaccine).exists():
+                    id_certificat =  CertificatVaccination.objects.get(patient=patient_av , vaccin=vaccine)
                     context = {
                         'cr': certificat,
                         'id_certificat': id_certificat
@@ -362,21 +418,28 @@ def add_vaccination(request):
             else:
                 messages.error(request, 'Quantité insuffisante en stock pour vacciner.')
         else:
-                # Création de l'objet Patient
+            
+            nni_validator = RegexValidator(r'^[0-9]\d{9}$', 'Le NNI doit être dans un format valide.')
+
             patient = Patient()
             patient.nom = request.POST['nom']
             patient.prenom = request.POST['prenom']
             patient.nni = request.POST['nni']
             patient.sexe = request.POST['sexe']
             patient.dateNaissance = request.POST['dateNaissence']
-            
+
+            try:
+                nni_validator(patient.nni)
+            except ValidationError as e:
+                messages.error(request, e)
+                return redirect('add_vaccination')
 
             # Création de l'objet Vaccination
             vaccination_p = Vaccination()
             vaccination_p.vaccine = vaccine
             vaccination_p.dose_number = vaccine.total_doses
             vaccination_p.center = center
-            vaccination_p.date_dernier_dose = datetime.now().strftime('%Y-%m-%d')
+            vaccination_p.date_darnier_dose = date.today()
             
 
             # Mise à jour de l'objet StockVaccins
@@ -408,79 +471,92 @@ def add_vaccination(request):
             else:
                 messages.error(request, 'Quantité insuffisante en stock pour vacciner.')
      
+    tp = TypeVaccination.objects.get(id=id)
     centerAdmin = AdminCenter.objects.get(user=request.user)
     center = CentreDeVaccination.objects.get(id=centerAdmin.center.id)
-    stock_data = StockVaccins.objects.filter(centerVaccination=center).distinct('vaccine')
+    stock_data = StockVaccins.objects.filter(centerVaccination=center, vaccine__type=tp).distinct('vaccine')
 
-    return render(request, 'vaccination/vaccinationForm.html', {'stock_data':stock_data})
+    tps = TypeVaccination.objects.all()
 
-def vaccination_certificat(request):
+    context = {
+        'tps': tps,
+        'tp': tp,
+        'stock_data':stock_data
+    }
+    return render(request, 'vaccination/vaccinationForm.html', context)
+
+
+@login_required
+def vaccins(request):
     if request.method == 'POST':
-        form = ID_crf(request.POST)
-        if form.is_valid():
-            ID = form.cleaned_data['Id']
-            if CertificatVaccination.objects.filter(id_certificat=ID).exists():
-                id_certificat =  CertificatVaccination.objects.get(id_certificat=ID)
-                Dose = Vaccin_Dose.objects.filter(patient=id_certificat.patient,vaccin=id_certificat.vaccin)
-                context = {
-                    'Dose':Dose,
-                    'id_certificat': id_certificat
-                }
-                return render(request, 'vaccination/CRF.html', context)
-            else:
-                messages.error(request,'N\'exist pas ')
-                return redirect('vaccination_certificat')
+        # form = Complemantaire_V(request.POST)
+        # if form.is_valid():
+        nni = request.POST['nni']
+        if Patient.objects.filter(nni=nni).exists(): 
+            patien = Patient.objects.get(nni=nni)   
+            vaccins = Vaccination.objects.filter(patient=patien)
+            context = {
+                'vaccins': vaccins
+            }
+            return render(request, 'vaccination/patient_vaccins.html', context)
         else:
-            return redirect('vaccination_certificat')
+            messages.error(request, 'Ce NNI ne corespond pas a un patient')
+            return redirect('vaccins')
     else:
-        form = ID_crf()
-        return render(request, 'vaccination/vaccination_certificat.html', {'form':form})
+        # form = Complemantaire_V()
+        return render(request, 'vaccination/vaccination_C.html')
 
 
-def vaccination_complementaire(request):
-    if request.method == 'POST':
-        form = Complemantaire_V(request.POST)
-        if form.is_valid():
-            nni = form.cleaned_data['nni']
-            if Patient.objects.filter(nni=nni).exists(): 
-                patien = Patient.objects.get(nni=nni)   
-                certificats = Vaccination.objects.get(patient=patien)
-                if Dose.objects.filter(vaccine=certificats.vaccine).exists:
-                    dure = Dose.objects.filter(vaccine=certificats.vaccine)
-                    for i in dure:
-                        if i.number == certificats.dose_administré and i.durée > certificats.date_darnier_dose - date.today():
-                            messages.error(request, 'Imposible de prendre ce dose avant que le duree est fini')
-                            return redirect('vaccination_complementaire')
-                    admin = AdminCenter.objects.get(user=request.user)
-                    center=admin.center
-                    certificats.dose_administré += 1    
-                    certificats.date_darnier_dose = datetime.today()
-                    certificats.center=center
-                    certificats.save()
-                    dose = Vaccin_Dose()
-                    dose.vaccination=certificats
-                    dose.patient=certificats.patient
-                    dose.vaccin=certificats.vaccine
-                    dose.save()               
-                    id_certificat =  CertificatVaccination.objects.get(patient=certificats.patient)
-                    context = {
-                                'cr': certificats,
-                                'id_certificat': id_certificat
-                    }
-                    return render(request, 'vaccination/certificat.html', context)
+def vaccination_complementaire(request, id):
+    # if request.method == 'POST':
+    #     form = Complemantaire_V(request.POST)
+    #     if form.is_valid():
+    vac = Vaccination.objects.get(id=id)
+            # nni = form.cleaned_data['nni']
+            # if Patient.objects.filter(nni=nni).exists(): 
+            #     patien = Patient.objects.get(nni=nni)   
+            #     certificats = Vaccination.objects.get(patient=patien)
+    # if Dose.objects.filter(vaccine=vac.vaccine).exists:
+    #     dure = Dose.objects.filter(vaccine=vac.vaccine)
+    #     for i in dure:
+    #         if i.number == vac.dose_administré and i.durée > vac.date_darnier_dose - date.today():
+    #             messages.error(request, 'Imposible de prendre ce dose avant que le duree est fini')
+    #             return redirect('vaccination_complementaire')
+    admin = AdminCenter.objects.get(user=request.user)
+    center=admin.center
+    vac.dose_administré += 1    
+    vac.date_darnier_dose = datetime.today()
+    vac.center=center
+    vac.save()
+    dose = Vaccin_Dose()
+    dose.vaccination=vac
+    dose.patient=vac.patient
+    dose.vaccin=vac.vaccine
+    dose.save()               
+    if CertificatVaccination.objects.filter(patient=vac.patient, vaccin=vac.vaccine).exists():
+        id_certificat =  CertificatVaccination.objects.get(patient=vac.patient, vaccin=vac.vaccine)
+        context = {
+            'cr': vac,
+            'id_certificat': id_certificat
+        }
+    else:
+        context = {
+                'cr': vac
+        }
+    return render(request, 'vaccination/certificat.html', context)
                             
-                else:
-                    messages.error(request, 'Ce vaccin a un seul dose ok!')
-                    return redirect('vaccination_complementaire')
+    #             else:
+    #                 messages.error(request, 'Ce vaccin a un seul dose ok!')
+    #                 return redirect('vaccination_complementaire')
                 
-            else:
-                messages.error(request, 'Ce NNI ne corespond pas a un patient')
-                return redirect('vaccination_complementaire')
-        else:
-            return redirect('vaccination_complementaire')
-    else:
-        form = Complemantaire_V()
-        return render(request, 'vaccination/vaccination_C.html', {'form':form})
+    #         else:
+    #             messages.error(request, 'Ce NNI ne corespond pas a un patient')
+    #             return redirect('vaccination_complementaire')
+    #     else:
+    #         return redirect('vaccination_complementaire')
+    # else:
+    #     form = Complemantaire_V()
+    #     return render(request, 'vaccination/vaccination_C.html', {'form':form})
 
 
 
@@ -500,9 +576,7 @@ def add_staff(request):
 
 #======------------tst-------======$#
 @login_required
-# @user_passes_test(lambda u: u.role == '')
 def vaccination_type(request):
-
     type_vaccination = TypeVaccination.objects.all()
 
     return render(request, 'vaccination_type.html', {'type_vaccination': type_vaccination})

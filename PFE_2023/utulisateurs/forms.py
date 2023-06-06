@@ -54,9 +54,14 @@ class ProfileUpdateForm(forms.ModelForm):
 #_ajouter_un_center
 from django.core.validators import RegexValidator
 phone_regex = RegexValidator(
-    #r'^\+?1?\d{9,15}$'
     regex=r'^(\+2222|\+2223|\+2224|002222|002223|002224|2|3|4)[0-9]{7}$',  # Format international avec ou sans le préfixe '+'
     message="Le numéro de téléphone doit être dans un format valide."
+)
+
+nni_regex = RegexValidator(
+    #r'^\+?1?\d{9,15}$'
+    regex=r'^(\0|\1)[0-9]{9}$',  # Format international avec ou sans le préfixe '+'
+    message="Le NNI doit être dans un format valide."
 )
  
 class AddCenterForm(forms.Form):
@@ -170,54 +175,54 @@ class StockForm(forms.Form):
             dateExpiration=self.cleaned_data['dateExpiration'],
         )
 #---------------------vaccination----------------#
+from datetime import date
+# class VaccinationForm(forms.Form):
+#     SEXE=[
+#         ('homme','Homme'),
+#         ('femme','Femme')
+#     ]
+#     nni = forms.CharField( validators=[nni_regex], widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))
+#     nom = forms.CharField(max_length=50, widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))
+#     prenom = forms.CharField(max_length=50, widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))
+#     dateNaissance = forms.DateField(widget= forms.DateInput(attrs={
+#         'class':'datepicker form-control col-6',
+#         'type': 'date'}))
+#     sexe = forms.ChoiceField(choices=SEXE, widget=forms.Select(attrs={'class':'form-control col-4 my-2'}))
+#     vaccine = forms.ChoiceField(choices=[(s.pk, s.nom) for s in Vaccine.objects.all()], widget=forms.Select(attrs={'class':'form-control col-6 '}))
 
-class VaccinationForm(forms.Form):
-    SEXE=[
-        ('homme','Homme'),
-        ('femme','Femme')
-    ]
-    nni = forms.CharField( widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))
-    nom = forms.CharField(max_length=50, widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))
-    prenom = forms.CharField(max_length=50, widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))
-    dateNaissance = forms.DateField(widget= forms.DateInput(attrs={
-        'class':'datepicker form-control col-6',
-        'type': 'date'}))
-    sexe = forms.ChoiceField(choices=SEXE, widget=forms.Select(attrs={'class':'form-control col-4 my-2'}))
-    vaccine = forms.ChoiceField(choices=[(s.pk, s.nom) for s in Vaccine.objects.all()], widget=forms.Select(attrs={'class':'form-control col-6 '}))
+#     def _init_(self, *args, **kwargs):
+#         request = kwargs.pop('request', None)
+#         super(VaccinationForm, self)._init_(*args, **kwargs)
+#         if request:
+#             center = AdminCenter.objects.get(user=request.user)
+#             stock = StockVaccins.objects.filter(
+#                 centerVaccination=center.center,
+#                 dateExpiration__gte=datetime.today(),
+#                 quantite__gte=1
+#             ).select_related('vaccine')
+#             self.fields['vaccine'].choices = [(s.vaccine.pk, s.vaccine.nom) for s in stock]
 
-    def _init_(self, *args, **kwargs):
-        request = kwargs.pop('request', None)
-        super(VaccinationForm, self)._init_(*args, **kwargs)
-        if request:
-            center = AdminCenter.objects.get(user=request.user)
-            stock = StockVaccins.objects.filter(
-                centerVaccination=center.center,
-                dateExpiration__gte=datetime.today(),
-                quantite__gte=1
-            ).select_related('vaccine')
-            self.fields['vaccine'].choices = [(s.vaccine.pk, s.vaccine.nom) for s in stock]
+#     def save(self, commit=True, request=None):
+#         user= request.user if request else None
+#         center = AdminCenter.objects.get(user=user)
+#         #creation patient
+#         patient = Patient.objects.create(
+#             nom = self.cleaned_data['nom'],
+#             prenom = self.cleaned_data['prenom'],
+#             nni = self.cleaned_data['nni'],
+#             dateNaissance = self.cleaned_data['dateNaissance'],
+#             sexe = self.cleaned_data['sexe']
+#         )
+#         #vaccination
+#         vaccination = Vaccination.objects.create(
+#             patient = patient,
+#             vaccine=Vaccine.objects.get(id=self.cleaned_data['vaccine']),
+#             dose_number =Vaccine.objects.get(id=self.cleaned_data['vaccine']).total_doses,
+#             center = center.center,         
+#             date_darnier_dose = date.today()
+#         )
 
-    def save(self, commit=True, request=None):
-        user= request.user if request else None
-        center = AdminCenter.objects.get(user=user)
-        #creation patient
-        patient = Patient.objects.create(
-            nom = self.cleaned_data['nom'],
-            prenom = self.cleaned_data['prenom'],
-            nni = self.cleaned_data['nni'],
-            dateNaissance = self.cleaned_data['dateNaissance'],
-            sexe = self.cleaned_data['sexe']
-        )
-        #vaccination
-        vaccination = Vaccination.objects.create(
-            patient = patient,
-            vaccine=Vaccine.objects.get(id=self.cleaned_data['vaccine']),
-            dose_number =Vaccine.objects.get(id=self.cleaned_data['vaccine']).total_doses,
-            center = center.center,         
-            date_darnier_dose = datetime.now().strftime('%Y-%m-%d')
-        )
-
-        return vaccination
+#         return vaccination
 #--------------staff------------------#
 class Add_staff(forms.Form):
     ROLES = (
@@ -230,7 +235,7 @@ class Add_staff(forms.Form):
          widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}
          ))
     email = forms.CharField(widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6 my-2'}))
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control col-6 my-2'}))
+    password = 'emp2023'
     role = forms.ChoiceField(choices=ROLES, widget=forms.Select(attrs={'class':'form-control col-4 my-2'}))
 
     def save(self, commit=True, request=None):
@@ -240,18 +245,18 @@ class Add_staff(forms.Form):
         user = User.objects.create_user(
             email=self.cleaned_data['email'],
             phone_number=self.cleaned_data['phone_number'],
-            password=self.cleaned_data['password'],
+            password=self.password,
             role=self.cleaned_data['role'],
         )
 
         admin_center = AdminCenter.objects.create(user=user, center=center.center)
 
-class Complemantaire_V(forms.Form):
-    nni = forms.CharField(label='NNI',widget=forms.TextInput(attrs={'class':'form-control col-6 my-2','name':'nni'}))
+# class Complemantaire_V(forms.Form):
+#     nni = forms.IntegerField(label='NNI', validators=[nni_regex],widget=forms.TextInput(attrs={'class':'form-control col-6 my-2','name':'nni'}))
 
-    class Meta:
-        model = Patient
-        fields = [ 'nni']
+#     class Meta:
+#         model = Patient
+#         fields = [ 'nni']
 
 class ID_crf(forms.Form):
     Id = forms.CharField(label='ID Certificat',widget=forms.TextInput(attrs={'class':'form-control col-6 my-2','name':'nni'}))
@@ -259,3 +264,20 @@ class ID_crf(forms.Form):
     class Meta:
         model = CentreDeVaccination
         fields = [ 'id_certificat']
+
+class Vac_type(forms.Form):
+    CATEGORIE = (
+        ('enfants', 'Enfants'),
+        ('jeunes-femmes', 'Jeunes-Femmes'),
+        ('jeunes-hommes', 'Jeunes-Hommes'),
+        ('veux', 'Veux'),
+        ('tout-monde', 'Tout-Monde')
+    )
+    nom = forms.CharField(max_length=50, widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))
+    categorie = forms.ChoiceField(choices=CATEGORIE, widget=forms.Select(attrs={'class':'form-control col-4 my-2'}))
+
+    def save(self):
+        tp = TypeVaccination.objects.create(
+            nom = self.cleaned_data['nom'],
+            categorie = self.cleaned_data['categorie'],
+        )

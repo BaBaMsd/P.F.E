@@ -4,6 +4,12 @@
 {% block content %}
 
 <div class="container ">
+               <center> <select class="form-select form-control input-group col-6" onchange="location = this.value;">
+                  <option selected>{{ tp.nom}}</option>
+                  {% for i in tps %}
+                  <option value="{% url 'add_vaccination' i.id %}"><a href="{% url 'accueil' i.id %}" class="nav-link">{{ i.nom }}</a></option>
+                  {% endfor %}
+                </select></center>
             <h2>Nouvelle Vaccination</h2>
             <form method=POST>
                 <!-- {% csrf_token %}
@@ -11,7 +17,7 @@
                 <button type="submit" class="btn btn-outline-info mb-4">Effectuer</button> -->
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="nni">Nni</label>
+                    <label for="nni">N.N.I</label>
                     <input type="number" class="form-control input-group mb-3 col-6" id="nni" name="nni" required>
                   </div>
                   <div class="form-group">
@@ -34,7 +40,7 @@
                     </select>
                   </div>
                   <div class="form-group">
-                    <label for="vaccine">Vaccine</label>
+                    <label for="vaccine">Vaccin</label>
                     <select class="form-select form-control input-group mb-3 col-6"  Required name="vaccine">
                       {% for i in stock_data %}
                       <option value="{{i.vaccine.id}}">{{ i.vaccine.nom }}</option> 
