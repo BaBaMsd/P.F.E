@@ -1,8 +1,4 @@
 from django.shortcuts import render
-from rest_framework import permissions
-from rest_framework.response import Response
-from rest_framework import generics
-from utulisateurs.serializers import  PatientSerializer
 from utulisateurs.EmailBackend import EmailBackend
 from utulisateurs.models import *
 from django.shortcuts import render, redirect
@@ -22,9 +18,13 @@ def login(request):
 
         if user is not None:
             Login_process(request, user)
+            if user.role == 'gerent-stock':
+                return redirect('stock_center')
+            if user.role == 'professionnel':
+                return redirect('choix_vaccination')
             return redirect('ac')
         else:
-            messages.error(request, 'email ou mot pass invalid ')
+            messages.error(request, 'Email ou mot pass invalid ')
             return redirect('login')
 
     form = CustomLoginForm()

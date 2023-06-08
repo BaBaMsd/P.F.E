@@ -224,6 +224,13 @@ def add_vaccine(request):
     }
     return render(request, 'add_vaccine.html', context)
 
+def delete_vaccination_type(request, id):
+    type_vac = TypeVaccination.objects.get(id=id)
+    type_vac.delete()
+    messages.success(request, 'Un type de vaccination a été supprimée avec succès')
+    return redirect(reverse('vaccination_type'))
+    
+
 def delete_vaccine(request, id):
     vaccine = Vaccine.objects.get(id=id)
     vaccine.delete()
@@ -362,7 +369,6 @@ def vaccination_certificat(request):
 @user_passes_test(lambda u: u.role in ['responsable-center', 'professionnel'])
 
 def choix_vaccination(request):
-    # tps = TypeVaccination.objects.all()
     type_vaccination = TypeVaccination.objects.all()
     if type_vaccination.exists():
         idtp = type_vaccination[0].id  
@@ -378,9 +384,9 @@ def add_vaccination(request, id):
         centerAdmin = AdminCenter.objects.get(user=request.user)
         center = CentreDeVaccination.objects.get(id=centerAdmin.center.id)
         vaccine = Vaccine.objects.get(id=request.POST['vaccine'])
-        if vaccine.type.categorie == 'jeunes-femmes' and request.POST['sexe'] == 'Homme':
-            messages.error(request, "Cette vaccination est specifique pour les femmes!")       
-            return redirect('add_vaccination')
+        if vaccine.type.sexe_cible != request.POST['sexe']:
+                messages.error(request, f'Cette vaccination est specifique pour: {vaccine.type.sexe_cible}')       
+                return redirect('add_vaccination')
         if Vaccination.objects.filter(patient__nni=request.POST['nni'],vaccine__type=vaccine.type).exists():
             print('exist')
             messages.error(request, "Ce patient a déja pris cette vaccination!")

@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="container">
-    
+    <center><h2>Liste des vaccins</h2></center>
     <a href="{% url 'add_vaccine' %}" class="btn btn-primary my-2">Nouvelle vaccine</a>
     
     <div class="row">
@@ -20,8 +20,8 @@
                         <li class="list-group-item">Type-Vaccination: <b>{{  i.type.nom }}</b></li>
                         <li class="list-group-item">Fabricant: <b>{{  i.fabricant}}</b></li>
                         <li class="list-group-item">Nomber doses: <b>{{ i.total_doses}}</b></li>
-                        <li class="list-group-item">Dose Administrée: <b>{{ i.doses_administrées}}</b></li>
-                        <li> <a href="{% url 'supp_vaccine' i.id  %}" class="btn btn-danger list-group-item">Suprimmer</a></li>
+                        <li class="list-group-item">Dose a Administrée: <b>{{ i.doses_administrées}}</b></li><br />
+                         <a href="{% url 'supp_vaccine' i.id  %}" class="btn btn-danger">Suprimmer</a></li>
                 </ul>
             </div>
         </div>

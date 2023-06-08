@@ -8,7 +8,7 @@ from utulisateurs.Contrller import auth
 from utulisateurs.RestApi import api
 urlpatterns = [
     path('admin/', admin.site.urls),
-    #api
+    # api
     path('patient_rg/', api.register_patient, name='patient_rg'),
     path('login_P/', api.PatientLoginView.as_view(), name='login_P'),
     path('patient_DT/<int:id>/',api.getUserData , name='patient_DT'),
@@ -42,6 +42,7 @@ urlpatterns = [
     path('remove_stock/supp/<int:id>/', remove_stock , name='remove_stock'),
     path('vaccines/update/<int:id>/', update_vaccine, name='update_vaccine'),
     path('vaccines/delete/<int:id>/', delete_vaccine, name='supp_vaccine'),
+    path('vaccinatiom_type/delete/<int:id>/', delete_vaccination_type, name='supp_type vac'),
 
 ]
 

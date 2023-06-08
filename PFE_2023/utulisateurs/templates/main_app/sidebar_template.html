@@ -222,7 +222,7 @@
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                 <li class="nav-item">
                     <a href="{% url 'ac' %}" class="nav-link">
-                        <i class="nav-icon fas fa-home"></i>
+                        <!-- <i class="nav-icon fas fa-home"></i> -->
                         <p>
                             Accueil
 
@@ -233,7 +233,7 @@
                     
                     <a href="{% url 'profile' %}"
                         class="nav-link {% if admin_view_profile == request.path %} active {% endif %}">
-                        <i class="nav-icon fas fa-address-card"></i>
+                        <!-- <i class="nav-icon fas fa-address-card"></i> -->
                         <p>
                             Profile
 
@@ -242,7 +242,7 @@
                 </li>
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-book"></i>
+                        <!-- <i class="nav-icon fas fa-book"></i> -->
                         <p>
                             Centres
                             <i class="fas fa-angle-left right"></i>
@@ -252,7 +252,7 @@
                         <li class="nav-item">
                             <a href="{% url 'addCenterForm' %}"
                                 class="nav-link ">
-                                <i class="far fa-circle nav-icon"></i>
+                                <!-- <i class="far fa-circle nav-icon"></i> -->
                                 <p>
                                     Nouveau centre
                                 </p>
@@ -260,7 +260,7 @@
                         </li>
                         <li class="nav-item">
                             <a href="{% url 'centres' %}" class="nav-link">
-                                <i class="nav-icon fas fa-home"></i>
+                                <!-- <i class="nav-icon fas fa-home"></i> -->
                                 <p>
                                     Liste-centres
         
@@ -271,7 +271,7 @@
                 </li>
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-book"></i>
+                        <!-- <i class="nav-icon fas fa-book"></i> -->
                         <p>
                             Vaccination
                             <i class="fas fa-angle-left right"></i>
@@ -281,7 +281,7 @@
                         <li class="nav-item">
                             <a href="{% url 'liste_vaccine' %}"
                                 class="nav-link ">
-                                <i class="far fa-circle nav-icon"></i>
+                                <!-- <i class="far fa-circle nav-icon"></i> -->
                                 <p>
                                     Liste-vaccines
                                 </p>
@@ -289,7 +289,7 @@
                         </li>
                         <li class="nav-item">
                             <a href="{% url 'vaccination_type' %}" class="nav-link">
-                                <i class="nav-icon fas fa-home"></i>
+                                <!-- <i class="nav-icon fas fa-home"></i> -->
                                 <p>
                                     Type-Vaccination
         
@@ -302,7 +302,7 @@
                 <li class="nav-item">
                     <a href="{% url 'logout' %}" class="nav-link">
 
-                        <i class="fa-duotone fa-syringe"></i> 
+                        <!-- <i class="fa-duotone fa-syringe"></i>  -->
                         <p>
                             Déconnexion
                         </p>
@@ -319,7 +319,7 @@
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                 <li class="nav-item">
                     <a href="{% url 'ac' %}" class="nav-link">
-                        <i class="nav-icon fas fa-home"></i>
+                        <!-- <i class="nav-icon fas fa-home"></i> -->
                         <p>
                             Accueil
 
@@ -330,7 +330,7 @@
                     
                     <a href="{% url 'profile' %}"
                         class="nav-link {% if admin_view_profile == request.path %} active {% endif %}">
-                        <i class="nav-icon fas fa-address-card"></i>
+                        <!-- <i class="nav-icon fas fa-address-card"></i> -->
                         <p>
                             Profile
 
@@ -342,14 +342,14 @@
                         <i class="nav-icon fas fa-book"></i>
                         <p>
                             Vaccination
-                            <i class="fas fa-angle-left right"></i>
+                            <!-- <i class="fas fa-angle-left right"></i> -->
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
                             <a href="{% url 'add_vaccination' %}"
                                 class="nav-link ">
-                                <i class="far fa-circle nav-icon"></i>
+                                <!-- <i class="far fa-circle nav-icon"></i> -->
                                 <p>
                                     Nouvelle
                                 </p>
@@ -358,7 +358,7 @@
                         <li class="#">
                             <a href="{% url 'vaccination_complementaire' %}"
                                 class="nav-link ">
-                                <i class="far fa-circle nav-icon"></i>
+                                <!-- <i class="far fa-circle nav-icon"></i> -->
                                 <p>
                                     Completrantaire
                                 </p>
@@ -370,7 +370,7 @@
                 <li class="nav-item">
                     <a href="{% url 'logout' %}" class="nav-link">
 
-                        <i class="fa-duotone fa-syringe"></i> 
+                        <!-- <i class="fa-duotone fa-syringe"></i>  -->
                         <p>
                             Déconnexion
                         </p>
@@ -380,7 +380,7 @@
             {% elif request.user.role == 'gerent-stock' %}
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a href="{% url 'ac' %}" class="nav-link">
                             <i class="nav-icon fas fa-home"></i>
                             <p>
@@ -388,12 +388,12 @@
     
                             </p>
                         </a>
-                    </li>
+                    </li> -->
                     <li class="nav-item">
                         
                         <a href="{% url 'profile' %}"
                             class="nav-link {% if admin_view_profile == request.path %} active {% endif %}">
-                            <i class="nav-icon fas fa-address-card"></i>
+                            <!-- <i class="nav-icon fas fa-address-card"></i> -->
                             <p>
                                 Profile
     
@@ -404,7 +404,7 @@
     
                     <li class="nav-item has-treeview">
                         <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-book"></i>
+                            <!-- <i class="nav-icon fas fa-book"></i> -->
                             <p>
                                 Stock
                                 <i class="fas fa-angle-left right"></i>
@@ -414,7 +414,7 @@
                             <li class="nav-item">
                                 <a href="{% url 'stockAddition' %}"
                                     class="nav-link ">
-                                    <i class="far fa-circle nav-icon"></i>
+                                    <!-- <i class="far fa-circle nav-icon"></i> -->
                                     <p>
                                         Addition
                                     </p>
@@ -423,7 +423,7 @@
                             <li class="nav-item">
                                 <a href="{% url 'stockSuppresion' %}"
                                     class="nav-link ">
-                                    <i class="far fa-circle nav-icon"></i>
+                                    <!-- <i class="far fa-circle nav-icon"></i> -->
                                     <p>
                                         Suppresion
                                     </p>
@@ -432,7 +432,7 @@
                             <li class="#">
                                 <a href="{% url 'stock_center' %}"
                                     class="nav-link ">
-                                    <i class="far fa-circle nav-icon"></i>
+                                    <!-- <i class="far fa-circle nav-icon"></i> -->
                                     <p>
                                         Consultations
     
@@ -445,7 +445,7 @@
                     <li class="nav-item">
                         <a href="{% url 'logout' %}" class="nav-link">
     
-                            <i class="fa-duotone fa-syringe"></i> 
+                            <!-- <i class="fa-duotone fa-syringe"></i>  -->
                             <p>
                                 Déconnexion
                             </p>

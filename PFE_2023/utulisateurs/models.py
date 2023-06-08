@@ -64,6 +64,7 @@ def create_profile(sender, instance, created, **kwargs):
         Profile.objects.create(user=instance)
 
 class Wilaya(models.Model):
+    code = models.CharField(max_length=2)
     nom = models.CharField(max_length=50)    
     def __str__(self):
         return self.nom
@@ -97,20 +98,22 @@ class AdminCenter(models.Model):
     def __str__(self):
         return f'{self.center.nom} {self.type}'
 
+
+
+
 class TypeVaccination(models.Model):
-    CATEGORIE = (
-        ('enfants', 'Enfants'),
-        ('jeunes-femmes', 'Jeunes-Femmes'),
-        ('jeunes-hommes', 'Jeunes-Hommes'),
-        ('veux', 'Veux'),
-        ('tout-monde', 'Tout-Monde')
-    )
-    nom = models.CharField(max_length=50)
-    categorie = models.CharField(choices=CATEGORIE, max_length=50)
+    SEXE=[
+        ('homme','Homme'),
+        ('femme','Femme')
+    ] 
+    nom = models.CharField(max_length=100)
+    description = models.TextField(default='')
+    sexe_cible = models.CharField(choices=SEXE,max_length=10,default='femme')
+    age_minimum = models.IntegerField(default=1)
+    age_maximum = models.IntegerField(default=100)
 
     def __str__(self):
-        return self.nom
-    
+        return self.nom    
 
 class Vaccine(models.Model):
     nom = models.CharField(max_length=100)

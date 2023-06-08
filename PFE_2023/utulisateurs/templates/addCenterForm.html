@@ -20,25 +20,25 @@
 </div>
 {% block custom_js %}
 
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7iU-ErVpTKuucu5uUi59Nqp0w7WNO4eA&libraries=places&callback=initMap"></script>
 <script>
-    var mymap = L.map('mapid').setView([20.2606, -10.3631], 6);
+    var mymap = new google.maps.Map(document.getElementById('mapid'), {
+        center: { lat: 20.2606, lng: -10.3631 },
+        zoom: 6
+    });
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
-    }).addTo(mymap);
-
-    var marker = L.marker([20.2606, -10.3631], {
+    var marker = new google.maps.Marker({
+        position: { lat: 20.2606, lng: -10.3631 },
+        map: mymap,
         draggable: true
-    }).addTo(mymap);
+    });
 
-    marker.on('dragend', function(event) {
-        var position = marker.getLatLng();
-        document.getElementById('lat').value = position.lat;
-        document.getElementById('lon').value = position.lng;
+    marker.addListener('dragend', function(event) {
+        var position = marker.getPosition();
+        document.getElementById('lat').value = position.lat();
+        document.getElementById('lon').value = position.lng();
     });
 </script>
-
 {% endblock custom_js %}
 
 
