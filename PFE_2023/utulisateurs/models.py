@@ -1,16 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser , PermissionsMixin, Group , Permission
 from utulisateurs.manager import UserManager
-# Create your models here.
 from django.contrib.auth.models import User
 import random
-from django.db.models.signals import post_save , pre_save
-from django.dispatch import receiver
 import  qrcode
-from PIL import Image, ImageDraw
+from PIL import Image
 from io import BytesIO
 from django.core.files import File
+from PIL import Image
+from datetime import date
 
+#utulisateurs
 
 class User(AbstractUser, PermissionsMixin):
     ROLES = (
@@ -26,8 +26,6 @@ class User(AbstractUser, PermissionsMixin):
     role = models.CharField(choices=ROLES, max_length=20, default='patient')
     nni = models.CharField(max_length=20,default='')
 
-    # USERNAME_FIELD = "email"
-    # REQUIRED_FIELDS = []
     USERNAME_FIELD = 'email'
     EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = ['phone_number']
@@ -36,7 +34,6 @@ class User(AbstractUser, PermissionsMixin):
     def __str__(self):
         return self.role + ", " + self.email
 
-from PIL import Image
 
 
 class Profile(models.Model):
@@ -58,10 +55,8 @@ class Profile(models.Model):
             img.save(self.image.path)
 
 
-@receiver(post_save, sender=User)
-def create_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
+
+#lieux
 
 class Wilaya(models.Model):
     code = models.CharField(max_length=2)
@@ -99,7 +94,7 @@ class AdminCenter(models.Model):
         return f'{self.center.nom} {self.type}'
 
 
-
+#vaccins
 
 class TypeVaccination(models.Model):
     SEXE=[
@@ -120,7 +115,7 @@ class Vaccine(models.Model):
     total_doses = models.IntegerField()
     type = models.ForeignKey(TypeVaccination, on_delete=models.CASCADE)
     fabricant = models.CharField(max_length=50)
-    doses_administrées = models.IntegerField()
+    doses_administrees = models.IntegerField() 
 
     def __str__(self):
         return self.nom
@@ -129,10 +124,11 @@ class Vaccine(models.Model):
 class Dose(models.Model):
     vaccine = models.ForeignKey(Vaccine, on_delete=models.CASCADE, related_name='doses')
     number = models.IntegerField(default=1)
-    durée = models.DurationField()
+    duree = models.DurationField()
     def __str__(self):
         return f'{self.vaccine.nom} dose: {self.number}  '
 
+# #stocks
 
 class StockVaccins(models.Model):
     OPERATION_CHOICES = [
@@ -170,21 +166,6 @@ class HistoriqueStock(models.Model):
 
 
 
-@receiver(post_save, sender=StockVaccins)
-def create_historiqueStock(sender, instance, created, **kwargs):
-    
-    if created:
-        HistoriqueStock.objects.create(
-            typeOperation=instance.typeOperation,
-            vaccine=instance.vaccine,
-            quantite=instance.quantite,
-            dateExpiration=instance.dateExpiration,
-            dateOperation=instance.dateOperation,
-            centerVaccination=instance.centerVaccination,
-            numeroLot = instance.numeroLot
-           
-        )
-
 
 #--------------------vaccination---------------#
 class Patient(models.Model):
@@ -204,22 +185,22 @@ class Patient(models.Model):
 
 class Vaccination(models.Model):
     STATUS=[
-        ('en_attend','En_Attend'),
-        ('validé','Validé'),
-        ('abondant','Abondant')
+        ('en attent','En_Attent'),
+        ('valide','Valide'),
+        ('abandonne','Abandonne')
     ]
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     vaccine = models.ForeignKey(Vaccine, on_delete=models.CASCADE)
     center = models.ForeignKey(CentreDeVaccination, on_delete=models.CASCADE)
     dose_number = models.IntegerField(default=0)
-    dose_administré = models.IntegerField(default=1)
+    dose_administre = models.IntegerField(default=1)
     date_darnier_dose = models.DateField()
     status = models.CharField(max_length=20,choices=STATUS, default='en_attend')
     qr_code = models.ImageField(upload_to='vaccination_qr_codes/', blank=True, null=True)
 
     def save(self, *args, **kwargs):
         # Generate QR code data
-        data = f"Nom: {self.patient.nom} {self.patient.prenom}\nCenter: {self.center.nom}\nMoughataa: {self.center.moughataa}\nType vaccine: {self.vaccine.type.nom}\nVaccine: {self.vaccine.nom}\nTotal doses: {self.dose_number}\nDoses administré: {self.dose_administré}\nDate darnier dose: {self.date_darnier_dose}\nStatus: {self.status}"
+        data = f"Nom: {self.patient.nom} {self.patient.prenom}\nCenter: {self.center.nom}\nMoughataa: {self.center.moughataa}\nType vaccine: {self.vaccine.type.nom}\nVaccine: {self.vaccine.nom}\nTotal doses: {self.dose_number}\nDoses administre: {self.dose_administre}\nDate darnier dose: {self.date_darnier_dose}\nStatus: {self.status}"
 
         # Generate QR code image
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
@@ -237,26 +218,6 @@ class Vaccination(models.Model):
     def __str__(self):
         return f'{self.patient.nom}-{self.vaccine.type.nom}-{self.vaccine.nom}'
 
-@receiver(pre_save, sender=Vaccination)
-def changeStatus(sender, instance,*args, **kwargs):
-    if instance.dose_administré == instance.dose_number:
-        instance.status = 'validé'
-        data = f"Nom: {instance.patient.nom} {instance.patient.prenom}\nCenter: {instance.center.nom}\nMoughataa: {instance.center.moughataa}\nType vaccine: {instance.vaccine.type.nom}\nVaccine: {instance.vaccine.nom}\nTotal doses: {instance.dose_number}\nDoses administré: {instance.dose_administré}\nDate darnier dose: {instance.date_darnier_dose}\nStatus: {instance.status}"
-
-        générer_certificat_vaccination(instance)
-
-        # Generate QR code image
-        qr = qrcode.QRCode(version=1, box_size=10, border=5)
-        qr.add_data(data)
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="black", back_color="white")
-
-        # Save QR code image to field
-        buffer = BytesIO()
-        img.save(buffer, format='PNG')
-        instance.qr_code.save(f"{instance.patient.nom}-vaccination-qr-code.png", File(buffer), save=False)
-
-        
         
 class Vaccin_Dose(models.Model):
     vaccination = models.ForeignKey(Vaccination, on_delete=models.CASCADE)
@@ -267,27 +228,15 @@ class Vaccin_Dose(models.Model):
         return f'{self.patient.nom} {self.vaccin.nom}'
 
 
-@receiver(post_save, sender=Vaccination)
-def SaveDose(sender, instance, created, **kwargs):  
-    if created:
-        Vaccin_Dose.objects.create(
-            vaccination=instance,
-            patient=instance.patient,
-            vaccin=instance.vaccine       
-        )
-    # if instance.dose_administré == instance.dose_number:
-    #     générer_certificat_vaccination(instance)
-        
 
 
-#-----------------certificat-----------------#
+# #-----------------certificat-----------------#
 class CertificatVaccination(models.Model):
     id_certificat = models.CharField(max_length=10, unique=True)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     vaccin = models.ForeignKey(Vaccine, on_delete=models.CASCADE)
     date_delivration = models.DateField()
     valide = models.BooleanField(default=False)
-    # vaccination = models.ForeignKey(Vaccination, on_delete=models.CASCADE)
     qr_code = models.ImageField(upload_to='vaccination_qr_codes/', blank=True, null=True)
 
     def save(self, *args, **kwargs):
@@ -311,28 +260,26 @@ class CertificatVaccination(models.Model):
     def __str__(self):
         return f'{self.patient.nom} {self.id_certificat}'
 
-import random
+
+#foctions
 
 def générer_id_certificat():
     hex_chars = '0123456789ABCDEF'
     return ''.join(random.choice(hex_chars) for _ in range(10))
 
-from datetime import date
+
 def générer_certificat_vaccination(vaccination):
     patient = vaccination.patient
     vaccin = vaccination.vaccine
 
-    if vaccination.dose_administré == vaccin.total_doses:     
+    if vaccination.dose_administre == vaccin.total_doses:     
         certificat = CertificatVaccination.objects.create(
             id_certificat=générer_id_certificat(),
             patient=patient,
             vaccin=vaccin,
             date_delivration= date.today(),
             valide=True,
-            # vaccination=vaccination
+
         )
 
-
-        print('ok')
         
-        # Autres actions pour générer le certificat (par exemple, génération de fichier PDF, envoi par email, etc.)

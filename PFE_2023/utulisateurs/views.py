@@ -403,10 +403,10 @@ def add_vaccination(request, id):
             stockage = StockVaccins.objects.filter(vaccine=vaccine,
             centerVaccination=center,
             dateExpiration__gte=datetime.today(),
-            quantite__gte=vaccine.doses_administrées 
+            quantite__gte=vaccine.doses_administrees 
             ).order_by('dateExpiration').first()
             if stockage:
-                stockage.quantite = stockage.quantite - vaccine.doses_administrées
+                stockage.quantite = stockage.quantite - vaccine.doses_administrees
                 stockage.save()
                 vaccination.save()
                 # certificat = Vaccination.objects.get(patient=patient)
@@ -453,11 +453,11 @@ def add_vaccination(request, id):
                 vaccine=vaccine,
                 centerVaccination=center,
                 dateExpiration__gte=datetime.today(),
-                quantite__gte=vaccine.doses_administrées
+                quantite__gte=vaccine.doses_administrees
             ).order_by('dateExpiration').first()
 
             if stockage:
-                stockage.quantite = stockage.quantite - vaccine.doses_administrées
+                stockage.quantite = stockage.quantite - vaccine.doses_administrees
                 stockage.save()
                 patient.save()
                 vaccination_p.patient = patient
@@ -525,12 +525,12 @@ def vaccination_complementaire(request, id):
     # if Dose.objects.filter(vaccine=vac.vaccine).exists:
     #     dure = Dose.objects.filter(vaccine=vac.vaccine)
     #     for i in dure:
-    #         if i.number == vac.dose_administré and i.durée > vac.date_darnier_dose - date.today():
+    #         if i.number == vac.dose_administre and i.duree > vac.date_darnier_dose - date.today():
     #             messages.error(request, 'Imposible de prendre ce dose avant que le duree est fini')
     #             return redirect('vaccination_complementaire')
     admin = AdminCenter.objects.get(user=request.user)
     center=admin.center
-    vac.dose_administré += 1    
+    vac.dose_administre += 1    
     vac.date_darnier_dose = datetime.today()
     vac.center=center
     vac.save()
