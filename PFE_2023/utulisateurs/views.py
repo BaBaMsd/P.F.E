@@ -50,7 +50,7 @@ def accueil(request, id):
     else:
         vaccinations = Vaccination.objects.filter(vaccine__type=type_v)
 
-    # Compter les vaccinations par état
+    # Compter les vaccinations par etat
     status_counts = {}
     for vaccination in vaccinations:
         if vaccination.status in status_counts:
@@ -123,7 +123,7 @@ def accueil(request, id):
         sex_counts[label] = vaccinations.filter(patient__sexe=label).count()
     
 
-    # Créer des listes pour les données des graphiques
+    # Creer des listes pour les donnees des graphiques
     status_labels = list(status_counts.keys())
     status_values = list(status_counts.values())
     vaccine_labels = list(vaccine_counts.keys())
@@ -133,7 +133,7 @@ def accueil(request, id):
 
     type_vs = TypeVaccination.objects.all()
 
-    # Passer les données aux templates
+    # Passer les donnees aux templates
     context = {
         'status_counts': status_counts,
         'vaccine_counts': vaccine_counts,
@@ -179,7 +179,7 @@ def add_type(request):
             messages.success(request, 'Nouveau type a ajouter')
             return redirect('add_type')
         else:
-            messages.error(request, 'Les données ne sont pas valid!')
+            messages.error(request, 'Les donnees ne sont pas valid!')
             return redirect('add_type')
     else:
         form = Vac_type()
@@ -227,14 +227,14 @@ def add_vaccine(request):
 def delete_vaccination_type(request, id):
     type_vac = TypeVaccination.objects.get(id=id)
     type_vac.delete()
-    messages.success(request, 'Un type de vaccination a été supprimée avec succès')
+    messages.success(request, 'Un type de vaccination a ete supprimee avec succès')
     return redirect(reverse('vaccination_type'))
     
 
 def delete_vaccine(request, id):
     vaccine = Vaccine.objects.get(id=id)
     vaccine.delete()
-    messages.success(request, 'La vaccination a été supprimée avec succès')
+    messages.success(request, 'La vaccination a ete supprimee avec succès')
     return redirect(reverse('liste_vaccine'))
     
 def update_vaccine(request, id):
@@ -242,7 +242,7 @@ def update_vaccine(request, id):
     form = VaccineForm(request.POST or None, instance=vaccine) 
     if form.is_valid(): 
         form.save()
-        messages.success(request, 'La vaccination a été modifiée avec succès')
+        messages.success(request, 'La vaccination a ete modifiee avec succès')
         return redirect(reverse('vaccines_list'))
     context = {'form': form}
     return render(request, 'vaccine_mod_form.html', context)
@@ -286,10 +286,10 @@ def stockSuppresion(request):
 
         total_disponible = sum([s.quantite for s in stock])
         if quantite_a_supprimer > total_disponible:
-            # Si la quantité à retirer est supérieure à la quantité disponible, affiche une erreur
-            messages.error(request, "La quantité à retirer est supérieure à la quantité disponible dans le stock.")
+            # Si la quantite à retirer est superieure à la quantite disponible, affiche une erreur
+            messages.error(request, "La quantite à retirer est superieure à la quantite disponible dans le stock.")
             return redirect('stockSuppresion')
-         # Retire la quantité de doses de vaccin du stock
+         # Retire la quantite de doses de vaccin du stock
         for s in stock:
             if s.quantite >= quantite_a_supprimer:
                 s.quantite -= quantite_a_supprimer
@@ -299,7 +299,7 @@ def stockSuppresion(request):
                 quantite_a_supprimer -= s.quantite
                 s.quantite = 0
                 s.save()
-        messages.success(request, 'L\'operation effectuer avec succée ')
+        messages.success(request, 'L\'operation effectuer avec succee ')
         centerAdmin = AdminCenter.objects.get(user=request.user)
         center = CentreDeVaccination.objects.get(id=centerAdmin.center.id)
         histoir = HistoriqueStock.objects.create(
@@ -309,7 +309,7 @@ def stockSuppresion(request):
             vaccine = vaccine,
             centerVaccination=center
         )
-        # Redirige vers la page de détail de la vaccination
+        # Redirige vers la page de detail de la vaccination
         return redirect('stockSuppresion')
 
     centerAdmin = AdminCenter.objects.get(user=request.user)
@@ -338,7 +338,7 @@ def stock_center(request):
 
 import random
 
-def générer_id_certificat():
+def generer_id_certificat():
     hex_chars = '0123456789ABCDEF'
     return ''.join(random.choice(hex_chars) for _ in range(10))
 
@@ -389,7 +389,7 @@ def add_vaccination(request, id):
                 return redirect('add_vaccination')
         if Vaccination.objects.filter(patient__nni=request.POST['nni'],vaccine__type=vaccine.type).exists():
             print('exist')
-            messages.error(request, "Ce patient a déja pris cette vaccination!")
+            messages.error(request, "Ce patient a deja pris cette vaccination!")
             return redirect('add_vaccination')
         elif Patient.objects.filter(nni=request.POST['nni']).exists():
             patient_av = Patient.objects.get(nni=request.POST['nni'])
@@ -422,7 +422,7 @@ def add_vaccination(request, id):
                     }
                 return render(request, 'vaccination/certificat.html', context)
             else:
-                messages.error(request, 'Quantité insuffisante en stock pour vacciner.')
+                messages.error(request, 'Quantite insuffisante en stock pour vacciner.')
         else:
             
             nni_validator = RegexValidator(r'^[0-9]\d{9}$', 'Le NNI doit être dans un format valide.')
@@ -440,7 +440,7 @@ def add_vaccination(request, id):
                 messages.error(request, e)
                 return redirect('add_vaccination')
 
-            # Création de l'objet Vaccination
+            # Creation de l'objet Vaccination
             vaccination_p = Vaccination()
             vaccination_p.vaccine = vaccine
             vaccination_p.dose_number = vaccine.total_doses
@@ -475,7 +475,7 @@ def add_vaccination(request, id):
                     }
                 return render(request, 'vaccination/certificat.html', context)
             else:
-                messages.error(request, 'Quantité insuffisante en stock pour vacciner.')
+                messages.error(request, 'Quantite insuffisante en stock pour vacciner.')
      
     tp = TypeVaccination.objects.get(id=id)
     centerAdmin = AdminCenter.objects.get(user=request.user)
@@ -604,15 +604,15 @@ def remove_stock(request, id):
     stock = sort_vaccination_stock(vaccine) # Trie le stock de vaccination
     quantite_a_supprimer = int(request.POST['quantite'])
     
-    # Vérifie si la quantité à retirer est inférieure ou égale à la quantité disponible
+    # Verifie si la quantite à retirer est inferieure ou egale à la quantite disponible
     total_disponible = sum([s.quantite for s in stock])
     if quantite_a_supprimer > total_disponible:
-        # Si la quantité à retirer est supérieure à la quantité disponible, affiche une erreur
-        error_message = "La quantité à retirer est supérieure à la quantité disponible."
+        # Si la quantite à retirer est superieure à la quantite disponible, affiche une erreur
+        error_message = "La quantite à retirer est superieure à la quantite disponible."
         return redirect('/')
        # return render(request, 'myapp/remove_stock.html', {'vaccination': vaccine, 'error_message': error_message})
     
-    # Retire la quantité de doses de vaccin du stock
+    # Retire la quantite de doses de vaccin du stock
     for s in stock:
         if s.quantite >= quantite_a_supprimer:
             s.quantite -= quantite_a_supprimer
@@ -623,5 +623,5 @@ def remove_stock(request, id):
             s.quantite = 0
             s.save()
     messages.success(request, 'Opp ok')
-    # Redirige vers la page de détail de la vaccination
+    # Redirige vers la page de detail de la vaccination
     return HttpResponseRedirect('/')

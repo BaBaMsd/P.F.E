@@ -86,11 +86,16 @@ WSGI_APPLICATION = 'PFE_2023.wsgi.application'
 #     }
 # }
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'mydatabase',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": 'vaccination_db',
+        'USER': 'postgres',
+        'PASSWORD': 'i18207',
+        'HOST':'localhost',
+        'PORT': '5433'
     }
 }
+
 
 
 
