@@ -1,16 +1,21 @@
 from rest_framework.response import Response
-from utulisateurs.serializers import  PatientSerializer
+from utulisateurs.serializers import  CentreSerializer, PatientSerializer
 from utulisateurs.models import *
 from django.contrib.auth import get_user_model
+
+from utulisateurs.views import centres
 User = get_user_model()
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
 from utulisateurs.serializers import  PatientSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes,authentication_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+
 
 
 #--------------login-Patient----------#
@@ -26,7 +31,7 @@ class PatientLoginView(ObtainAuthToken):
             raise AuthenticationFailed('check password')
         if user.check_password(password):
             
-            refresh = RefreshToken.for_user(patient)
+            refresh = RefreshToken.for_user(user)
             return Response({
                 'id':patient.id,
                 'nom':patient.nom,
@@ -60,7 +65,6 @@ def register_patient(request):
         
         return Response('ERRROR', status=400)
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUserData(request,id):
@@ -76,7 +80,7 @@ def getUserData(request,id):
         'nom_vaccination':vaccination.vaccine.nom,
         'centre':vaccination.center.nom,
         'dose_number':vaccination.dose_number,
-        'dose_administré':vaccination.dose_administré,
+        'dose_administre':vaccination.dose_administre,
         'date_dernier_dose':vaccination.date_darnier_dose,
         'status':vaccination.status,
         'wilaya':str(vaccination.center.moughataa.nom),
@@ -84,3 +88,22 @@ def getUserData(request,id):
         }
         return Response(user_data,status = 200)
 
+
+@api_view(['GET'])
+def getCentres(request):
+    if request.method == 'GET':
+        query = CentreDeVaccination.objects.all()
+        serializer = CentreSerializer(query, many = True)
+        return Response(
+            serializer.data
+        ,status=200)
+            
+
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def refreshToken(request):
+    if request.method == 'GET':
+        pass

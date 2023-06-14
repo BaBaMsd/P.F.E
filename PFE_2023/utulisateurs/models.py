@@ -212,14 +212,14 @@ class Vaccination(models.Model):
     vaccine = models.ForeignKey(Vaccine, on_delete=models.CASCADE)
     center = models.ForeignKey(CentreDeVaccination, on_delete=models.CASCADE)
     dose_number = models.IntegerField(default=0)
-    dose_administré = models.IntegerField(default=1)
+    dose_administre = models.IntegerField(default=1)
     date_darnier_dose = models.DateField()
     status = models.CharField(max_length=20,choices=STATUS, default='en_attend')
     qr_code = models.ImageField(upload_to='vaccination_qr_codes/', blank=True, null=True)
 
     def save(self, *args, **kwargs):
         # Generate QR code data
-        data = f"Nom: {self.patient.nom} {self.patient.prenom}\nCenter: {self.center.nom}\nMoughataa: {self.center.moughataa}\nType vaccine: {self.vaccine.type.nom}\nVaccine: {self.vaccine.nom}\nTotal doses: {self.dose_number}\nDoses administré: {self.dose_administré}\nDate darnier dose: {self.date_darnier_dose}\nStatus: {self.status}"
+        data = f"Nom: {self.patient.nom} {self.patient.prenom}\nCenter: {self.center.nom}\nMoughataa: {self.center.moughataa}\nType vaccine: {self.vaccine.type.nom}\nVaccine: {self.vaccine.nom}\nTotal doses: {self.dose_number}\nDoses administré: {self.dose_administre}\nDate darnier dose: {self.date_darnier_dose}\nStatus: {self.status}"
 
         # Generate QR code image
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
@@ -239,9 +239,9 @@ class Vaccination(models.Model):
 
 @receiver(pre_save, sender=Vaccination)
 def changeStatus(sender, instance,*args, **kwargs):
-    if instance.dose_administré == instance.dose_number:
+    if instance.dose_administre == instance.dose_number:
         instance.status = 'validé'
-        data = f"Nom: {instance.patient.nom} {instance.patient.prenom}\nCenter: {instance.center.nom}\nMoughataa: {instance.center.moughataa}\nType vaccine: {instance.vaccine.type.nom}\nVaccine: {instance.vaccine.nom}\nTotal doses: {instance.dose_number}\nDoses administré: {instance.dose_administré}\nDate darnier dose: {instance.date_darnier_dose}\nStatus: {instance.status}"
+        data = f"Nom: {instance.patient.nom} {instance.patient.prenom}\nCenter: {instance.center.nom}\nMoughataa: {instance.center.moughataa}\nType vaccine: {instance.vaccine.type.nom}\nVaccine: {instance.vaccine.nom}\nTotal doses: {instance.dose_number}\nDoses administré: {instance.dose_administre}\nDate darnier dose: {instance.date_darnier_dose}\nStatus: {instance.status}"
 
         générer_certificat_vaccination(instance)
 
@@ -275,7 +275,7 @@ def SaveDose(sender, instance, created, **kwargs):
             patient=instance.patient,
             vaccin=instance.vaccine       
         )
-    # if instance.dose_administré == instance.dose_number:
+    # if instance.dose_administre == instance.dose_number:
     #     générer_certificat_vaccination(instance)
         
 
@@ -322,7 +322,7 @@ def générer_certificat_vaccination(vaccination):
     patient = vaccination.patient
     vaccin = vaccination.vaccine
 
-    if vaccination.dose_administré == vaccin.total_doses:     
+    if vaccination.dose_administre == vaccin.total_doses:     
         certificat = CertificatVaccination.objects.create(
             id_certificat=générer_id_certificat(),
             patient=patient,
