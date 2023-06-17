@@ -98,6 +98,31 @@ def getCentres(request):
             serializer.data
         ,status=200)
             
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def userData(request,id):
+    if request.method == 'GET':
+        try:
+            patient = Patient.objects.get(id=id)
+            # vaccination = Vaccination.objects.get(patient=patient)
+        except Patient.DoesNotExist:
+            return Response(status=404)
+        user_data = {
+        'id': patient.id,
+        'nom': patient.nom,
+        'prenom':patient.prenom,
+        'nni':patient.nni,
+        
+        # 'centre':center.nom,
+        # 'dose_number':dose_number,
+        # 'dose_administre':dose_administre,
+        # 'date_dernier_dose':date_darnier_dose,
+        # 'status':status,
+        # 'wilaya':str(center.moughataa.nom),
+        # 'moughataa': str(center.moughataa.wilaya.nom),
+        }
+        return Response(user_data,status = 200)
+            
 
 
 

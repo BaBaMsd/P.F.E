@@ -13,6 +13,7 @@ urlpatterns = [
     path('login_P/', api.PatientLoginView.as_view(), name='login_P'),
     path('patient_DT/<int:id>/',api.getUserData , name='patient_DT'),
     path('centres_rest/',api.getCentres,name='centres'),
+    path('data/<int:id>',api.userData,name='centres'),
 
     #template
     path('add_staff/', add_staff, name='add_staff'),

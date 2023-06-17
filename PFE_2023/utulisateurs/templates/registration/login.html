@@ -2,11 +2,13 @@
 {% load crispy_forms_tags %}
 {% load static %}
 {% block content %}
-    <div class="container">
-        <form method="POST">
+<div class="container" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+    <form method="POST" style="display: flex; flex-direction: column; align-items:center;">
             {% csrf_token %}
-            <fieldset class="form-group">
-                <img src="{% static 'OIP.jpg' %}" alt="logoVaccin" style="margin-left: 150px;" />
+            <fieldset class="form-group" style="width: 500px;">
+                {% comment %} <img src="{% static 'vaccinated.png' %}" alt="logoVaccin" style="margin-left: 150px;" /> {% endcomment %}
+                <img src="{% static 'vaccinated.png' %}" alt="logoVaccin" style="width: 200px; height: auto; margin-left: 150px;" />
+
                 {{ form.as_p }}
             </fieldset>
             <div class="form-group">

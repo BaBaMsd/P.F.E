@@ -6,6 +6,8 @@ from django.contrib.auth.password_validation import validate_password
 from utulisateurs.models import CentreDeVaccination
 User = get_user_model()
 
+
+# eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjg2ODM4NjUzLCJpYXQiOjE2ODY4MzUwNTMsImp0aSI6IjU4Y2UyYjI2ZjM2NjQ0NDhhYzY2MmEwYTE1NjFjZGU2IiwidXNlcl9pZCI6M30.BOWeK4dGQ3DRP4UA4cdoJFf0uTcj-BRb1rFQ1h40Sr8
 #------------register-patient-sr-------#
 class PatientSerializer(serializers.ModelSerializer):
 
