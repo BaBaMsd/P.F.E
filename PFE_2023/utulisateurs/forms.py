@@ -12,9 +12,24 @@ from datetime import datetime
 
 #_formilair_aithentification
 class CustomLoginForm(forms.Form):
-    email = forms.CharField(label='Email',widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6 my-2'}))
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control col-6 my-2'}))
-
+    email = forms.CharField(
+        label='Email',
+        widget=forms.TextInput(
+            attrs={
+                'class': 'form-control input-group mb-3 col-md-12 ',
+                'style': 'border-color: #888888;'
+            }
+        )
+    )
+    password = forms.CharField(
+        label='Mot-de-pass',
+        widget=forms.PasswordInput(
+            attrs={
+                'class': 'form-control col-md-12',
+                'style': 'border-color: #888888;'
+            }
+        )
+    )
 #_formilaire_registrations
 class CustomUserCreationForm(forms.Form):
     ROLES = (
@@ -61,26 +76,30 @@ phone_regex = RegexValidator(
 nni_regex = RegexValidator(
     #r'^\+?1?\d{9,15}$'
     regex=r'^(\0|\1)[0-9]{9}$',  # Format international avec ou sans le préfixe '+'
-    message="Le NNI doit être dans un format valide."
+    message="Votre NNI doit être dans un format valide."
 )
  
 class AddCenterForm(forms.Form):
-    centre_nom = forms.CharField(max_length=50, widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'})) 
-    centre_moughataa = forms.ChoiceField(choices=[(i.pk, i.nom) for i in Moughataa.objects.all()], widget=forms.Select(attrs={'class':'form-control col-6 '}))
-    admin_nom = forms.CharField(max_length=30, widget= forms.TextInput(attrs={'class':'form-control col-6'}))
-    admin_email = forms.EmailField(widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))
+    centre_nom = forms.CharField(max_length=50, widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-8','style': 'border-color: #888888;'})) 
+    centre_moughataa = forms.ChoiceField(choices=[(i.pk, i.nom) for i in Moughataa.objects.all()], widget=forms.Select(attrs={'class':'form-control col-8','style': 'border-color: #888888;'}))
+    admin_nom = forms.CharField(max_length=30, widget= forms.TextInput(attrs={'class':'form-control col-8','style': 'border-color: #888888;'}))
+    admin_email = forms.EmailField(widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-8'
+    ,'style': 'border-color: #888888;'}))
     phone_number = forms.CharField(
         label="Numéro de téléphone",
         validators=[phone_regex],
-         widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}
+         widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-8'
+         ,'style': 'border-color: #888888;'}
          ))
     latitude = forms.DecimalField(widget=forms.TextInput(attrs={
         'id': 'lat',
-        'class':'form-control input-group mb-3 col-6'
+        'class':'form-control input-group mb-3 col-8',
+        'style': 'border-color: #888888;'
     }))
     longitude = forms.DecimalField(widget=forms.TextInput(attrs={
         'id': 'lon',
-        'class':'form-control input-group mb-3 col-6'
+        'class':'form-control input-group mb-3 col-8',
+        'style': 'border-color: #888888;'
     }) )
 
     role = "responsable-center"
@@ -109,11 +128,11 @@ class AddCenterForm(forms.Form):
 #<---------------------vaccins-et-doses---------->#
 
 class VaccineForm(forms.Form):
-    nom = forms.CharField(max_length=50, widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))
-    type = forms.ChoiceField(choices=[(i.pk, i.nom) for i in TypeVaccination.objects.all()], widget=forms.Select(attrs={'class':'form-control col-6 '}))
-    fabricant = forms.CharField(widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))
-    total_doses = forms.IntegerField(min_value=1, widget= forms.TextInput(attrs={'class':'form-control col-6'}))
-    doses_administrées = forms.IntegerField(widget= forms.TextInput(attrs={'class':'form-control col-6'}))
+    nom = forms.CharField(max_length=50, widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-12','style': 'border-color: #888888;'}))
+    type = forms.ChoiceField(label='Type de vaccination',choices=[(i.pk, i.nom) for i in TypeVaccination.objects.all()], widget=forms.Select(attrs={'class':'form-control col-12','style': 'border-color: #888888;'}))
+    fabricant = forms.CharField(widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-12','style': 'border-color: #888888;'}))
+    total_doses = forms.IntegerField(min_value=1, widget= forms.TextInput(attrs={'class':'form-control col-12','style': 'border-color: #888888;'}))
+    doses_administrées = forms.IntegerField(label='Quantite a administrée',widget= forms.TextInput(attrs={'class':'form-control col-12','style': 'border-color: #888888;'}))
     
     def save(self):
         vaccine = Vaccine.objects.create(
@@ -125,21 +144,20 @@ class VaccineForm(forms.Form):
         )
 
 class DoseForm(forms.ModelForm):
-    durée = forms.CharField(widget=forms.TextInput(attrs={'required': True,'class':'form-control col-6'}))
+    duree = forms.IntegerField(widget=forms.TextInput(attrs={'required': True,'class':'form-control col-12','style': 'border-color: #888888;'}))
 
     class Meta:
         model = Dose
-        fields = ['durée']
+        fields = ['duree']
 
     def _init_(self, *args, **kwargs):
         super()._init_(*args, **kwargs)
-        self.fields['durée'].required = True
-        self.fields['durée'].widget.attrs['placeholder'] = 'Durée (in days)'
-        self.fields['durée'].widget.attrs['class'] = 'form-control'
+        self.fields['duree'].required = True
+        self.fields['duree'].widget.attrs['placeholder'] = 'Durée (in days)'
+        self.fields['duree'].widget.attrs['class'] = 'form-control'
 
         # Add hidden fields for formset
         self.fields['id'].widget = forms.HiddenInput()
-        self.fields['DELETE'].widget = forms.HiddenInput()
 
 DoseFormSet = forms.inlineformset_factory(Vaccine, Dose, form=DoseForm, extra=0, min_num=1)
 
@@ -152,12 +170,16 @@ class StockForm(forms.Form):
     ]
     typeOperation = 'Addition'
     # typeOperation = forms.ChoiceField(choices=OPERATION_CHOICES, widget=forms.Select(attrs={'class':'form-control col-4 my-2'}))
-    vaccine = forms.ChoiceField(choices=[(i.pk, i.nom) for i in Vaccine.objects.all()], widget=forms.Select(attrs={'class':'form-control col-6 '}))
-    quantite = forms.IntegerField( widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))
+    vaccine = forms.ChoiceField(choices=[(i.pk, i.nom) for i in Vaccine.objects.all()], widget=forms.Select(attrs={'class':'form-control col-md-12',
+                'style': 'border-color: #888888; '}))
+    quantite = forms.IntegerField( widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-md-12',
+                'style': 'border-color: #888888;'}))
     dateExpiration = forms.DateField(widget= forms.DateInput(attrs={
-        'class':'datepicker form-control col-6',
+        'class':'datepicker form-control col-md-12',
+                'style': 'border-color: #888888;',
         'type': 'date'}))
-    numeroLot = forms.CharField(label= "Numéro de Lot", widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))
+    numeroLot = forms.CharField(label= "Numéro de Lot", widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-md-12',
+                'style': 'border-color: #888888;'}))
 
     
     def save(self, commit=True, request=None):
@@ -182,11 +204,14 @@ class Add_staff(forms.Form):
     phone_number = forms.CharField(
         label="Numéro de téléphone",
         validators=[phone_regex],
-         widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}
+         widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-md-12',
+                'style': 'border-color: #888888;'}
          ))
-    email = forms.CharField(widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6 my-2'}))
+    email = forms.CharField(widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-md-12',
+                'style': 'border-color: #888888;'}))
     password = 'emp2023'
-    role = forms.ChoiceField(choices=ROLES, widget=forms.Select(attrs={'class':'form-control col-4 my-2'}))
+    role = forms.ChoiceField(choices=ROLES, widget=forms.Select(attrs={'class':'form-control col-col-md-12',
+                'style': 'border-color: #888888;'}))
 
     def save(self, commit=True, request=None):
         user= request.user if request else None
@@ -203,7 +228,8 @@ class Add_staff(forms.Form):
 
 
 class ID_crf(forms.Form):
-    Id = forms.CharField(label='ID Certificat',widget=forms.TextInput(attrs={'class':'form-control col-6 my-2','name':'nni'}))
+    Id = forms.CharField(label='ID Certificat',widget=forms.TextInput(attrs={'class': 'form-control col-md-12',
+                'style': 'border-color: #888888;','name':'nni'}))
 
     class Meta:
         model = CentreDeVaccination
@@ -212,7 +238,8 @@ class ID_crf(forms.Form):
 class Vac_type(forms.Form):
     SEXE=[
         ('homme','Homme'),
-        ('femme','Femme')
+        ('femme','Femme'),
+        ('tous', 'Tous...')
     ] 
     nom = forms.CharField(max_length=50, widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))
     description = forms.CharField(max_length=50, widget= forms.TextInput(attrs={'class':'form-control input-group mb-3 col-6'}))

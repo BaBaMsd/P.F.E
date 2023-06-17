@@ -3,24 +3,27 @@
 
 {% block content %}
 <div class="container">
-    <center><h2>Liste des vaccins</h2></center>
-    <a href="{% url 'add_vaccine' %}" class="btn btn-primary my-2">Nouvelle vaccine</a>
+    <div class="my-2">
+        <a href="{% url 'add_vaccine' %}"" type="button" class="btn btn-success">Nouveau-vaccin</a>
+        <a href="{% url 'liste_vaccine' %}" type="button" class="btn btn-success">Vaccins-list</a>
+      </div>
+    <h2>Liste des vaccins</h2>
     
     <div class="row">
         {% for i in vaccine %}
-        <div class="col-sm-12">
+        <div class="col-sm-6">
         <div class="card">
             <div class="card-header">
-                <h3><a>{{ i.nom }}</a></h3>
+                <h5><a>{{ i.nom }}</a></h5>
             <!-- <a href="{% url 'update_vaccine' i.id %}" style="color: white;" class="btn btn-secondary">Modifier</a> -->
             </div>
             
             <div class="card-body">
                 <ul class="list-group">
-                        <li class="list-group-item">Type-Vaccination: <b>{{  i.type.nom }}</b></li>
-                        <li class="list-group-item">Fabricant: <b>{{  i.fabricant}}</b></li>
-                        <li class="list-group-item">Nomber doses: <b>{{ i.total_doses}}</b></li>
-                        <li class="list-group-item">Dose a Administrée: <b>{{ i.doses_administrées}}</b></li><br />
+                        <li class="list-group-item">Type-Vaccination: {{  i.type.nom }}</b></li>
+                        <li class="list-group-item">Fabricant: {{  i.fabricant}}</b></li>
+                        <li class="list-group-item">Nomber doses: {{ i.total_doses}}</b></li>
+                        <li class="list-group-item">Dose a Administrée: {{ i.doses_administrées}}</b></li><br />
                          <a href="{% url 'supp_vaccine' i.id  %}" class="btn btn-danger" onclick="return confirm('Etes vous sur de spprimmer cette vaccin')">Suprimmer</a></li>
                 </ul>
             </div>

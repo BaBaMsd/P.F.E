@@ -1,6 +1,7 @@
 {% extends "main_app/base.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
+<div class="container">
     <div class="content-section">
       <div class="media">
         
@@ -11,14 +12,13 @@
           <div class="text-end"> <a href="{% url 'changePassMot' %}" type="button" class="btn btn-primary">Changer-Mot-passe</a>
           </div>
           <hr>
-          
+          <img src="{{ user.profile.image.url }}" alt="User">
     
         </div>
       </div>
       <form method="POST" enctype="multipart/form-data">
           {% csrf_token %}
           <fieldset class="form-group">
-              {{ u_form.as_p }}
               {{ p_form.as_p }}
           </fieldset>
           <div class="form-group">
@@ -26,4 +26,5 @@
           </div>
       </form>
     </div>
+  </div>
 {% endblock content %}

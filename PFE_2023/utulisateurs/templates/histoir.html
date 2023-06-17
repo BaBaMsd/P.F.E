@@ -1,46 +1,61 @@
 {% extends 'main_app/base.html' %}
 
 {% block content %}
-<div class="container w-full"> 
-    <center><h1>L'Historique de stock </h1></center>
-    <div class="row my-2 mx-4">
-            <div class="card">
-                <div class="card-header">
-                </div>
-                <div class="card-body">
-                  <table class="table table-bordered">
-                    <thead>
-                      <tr>
-                        <th scope="col">N°</th>
-                        <th scope="col">Type-Op</th>
-                        <th scope="col">Vaccine</th>
-                        <th scope="col">Quantite</th>
-                       <th scope="col">Date Operation</th>
-                       <th scope="col">Date Expiration</th>
-                       <th scope="col">Numéro Lot</th>
-                       
-                      </tr>
-                    </thead>
-                    <tbody>
-                        {% for i in histoir %}
-                      <tr>
-                 
-                       <td>{{ forloop.counter }}</td>
-                        <td>{{ i.typeOperation}}</td>
-                        <td>{{ i.vaccine.nom }}</td>
-                        <td>{{ i.quantite }}</td>
-                        <td>{{ i.dateOperation }}</td>
-                        <td>{{ i.dateExpiration }}</td>
-                        <td>{{ i.numeroLot }}</td>
-                      </tr>
-                    {% endfor %}
-                       
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-        </div>
+<div class="container"> 
+  <div class="my-2">
+    <a href="{% url 'stock_center' %}" type="button" class="btn btn-success">Actuel</a>
+    <a href="{% url 'stockAddition' %}" type="button" class="btn btn-success">Entrant</a>
+    <a href="{% url 'stockSuppresion' %}" type="button" class="btn btn-success">Sortent</a>
+    
+  </div>
+  <h3>L'Historique de stock</h3>
+  <button id="exportBtn" type="button" class="btn btn-primary my-2">Exporter vers Excel</button>
+  <div class="card">
+    <div class="card-header">
+    </div>
+    <div class="card-body">
+      <table class="table table-bordered" id="stockTable">
+        <thead>
+          <tr>
+            <th scope="col">N°</th>
+            <th scope="col">Type-Opération</th>
+            <th scope="col">Vaccine</th>
+            <th scope="col">Quantite</th>
+            <th scope="col">Date Opération</th>
+            <th scope="col">Date Expiration</th>
+            <th scope="col">Numéro Lot</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in histoir %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ i.typeOperation}}</td>
+            <td>{{ i.vaccine.nom }}</td>
+            <td>{{ i.quantite }}</td>
+            <td>{{ i.dateOperation|date:"d/m/Y" }}</td>
+            <td>{{ i.dateExpiration|date:"d/m/Y" }}</td>
+            <td>{{ i.numeroLot }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
-</div>
+
+
+{% block custom_js %}
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+<script>
+  document.getElementById("exportBtn").addEventListener("click", function() {
+    const table = document.getElementById("stockTable");
+    const ws = XLSX.utils.table_to_sheet(table);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Historique de stock");
+    XLSX.writeFile(wb, "historique_stock.xlsx");
+  });
+</script>
+{% endblock custom_js %}
 
 {% endblock %}

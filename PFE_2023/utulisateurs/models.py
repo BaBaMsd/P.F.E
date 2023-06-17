@@ -1,20 +1,19 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser , PermissionsMixin, Group , Permission
 from utulisateurs.manager import UserManager
+# Create your models here.
 from django.contrib.auth.models import User
 import random
+from django.db.models.signals import post_save , pre_save
+from django.dispatch import receiver
 import  qrcode
-from PIL import Image
+from PIL import Image, ImageDraw
 from io import BytesIO
 from django.core.files import File
-from PIL import Image
-from datetime import date
 
-#utulisateurs
 
 class User(AbstractUser, PermissionsMixin):
     ROLES = (
-        ('directeur-regional', 'Directeur-Regional'),
         ('responsable-center', 'Responsable-Center'),
         ('patient', 'Patient'),
         ('professionnel','Professionnel'),
@@ -26,6 +25,7 @@ class User(AbstractUser, PermissionsMixin):
     role = models.CharField(choices=ROLES, max_length=20, default='patient')
     nni = models.CharField(max_length=20,default='')
 
+
     USERNAME_FIELD = 'email'
     EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = ['phone_number']
@@ -34,6 +34,7 @@ class User(AbstractUser, PermissionsMixin):
     def __str__(self):
         return self.role + ", " + self.email
 
+from PIL import Image
 
 
 class Profile(models.Model):
@@ -54,9 +55,6 @@ class Profile(models.Model):
             img.thumbnail(output_size)
             img.save(self.image.path)
 
-
-
-#lieux
 
 class Wilaya(models.Model):
     code = models.CharField(max_length=2)
@@ -94,7 +92,7 @@ class AdminCenter(models.Model):
         return f'{self.center.nom} {self.type}'
 
 
-#vaccins
+
 
 class TypeVaccination(models.Model):
     SEXE=[
@@ -115,7 +113,7 @@ class Vaccine(models.Model):
     total_doses = models.IntegerField()
     type = models.ForeignKey(TypeVaccination, on_delete=models.CASCADE)
     fabricant = models.CharField(max_length=50)
-    doses_administrees = models.IntegerField() 
+    doses_administrées = models.IntegerField()
 
     def __str__(self):
         return self.nom
@@ -124,11 +122,10 @@ class Vaccine(models.Model):
 class Dose(models.Model):
     vaccine = models.ForeignKey(Vaccine, on_delete=models.CASCADE, related_name='doses')
     number = models.IntegerField(default=1)
-    duree = models.DurationField()
+    duree = models.IntegerField()
     def __str__(self):
         return f'{self.vaccine.nom} dose: {self.number}  '
 
-# #stocks
 
 class StockVaccins(models.Model):
     OPERATION_CHOICES = [
@@ -166,7 +163,6 @@ class HistoriqueStock(models.Model):
 
 
 
-
 #--------------------vaccination---------------#
 class Patient(models.Model):
     SEXE=[
@@ -185,22 +181,22 @@ class Patient(models.Model):
 
 class Vaccination(models.Model):
     STATUS=[
-        ('en attent','En_Attent'),
-        ('valide','Valide'),
-        ('abandonne','Abandonne')
+        ('en_attent','En_Attent'),
+        ('certifie','Certifie'),
+        ('abondanne','Abondanne')
     ]
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     vaccine = models.ForeignKey(Vaccine, on_delete=models.CASCADE)
     center = models.ForeignKey(CentreDeVaccination, on_delete=models.CASCADE)
     dose_number = models.IntegerField(default=0)
-    dose_administré = models.IntegerField(default=1)
+    dose_administre = models.IntegerField(default=1)
     date_darnier_dose = models.DateField()
-    status = models.CharField(max_length=20,choices=STATUS, default='en_attend')
+    status = models.CharField(max_length=20,choices=STATUS, default='en_attent')
     qr_code = models.ImageField(upload_to='vaccination_qr_codes/', blank=True, null=True)
 
     def save(self, *args, **kwargs):
         # Generate QR code data
-        data = f"Nom: {self.patient.nom} {self.patient.prenom}\nCenter: {self.center.nom}\nMoughataa: {self.center.moughataa}\nType vaccine: {self.vaccine.type.nom}\nVaccine: {self.vaccine.nom}\nTotal doses: {self.dose_number}\nDoses administré: {self.dose_administré}\nDate darnier dose: {self.date_darnier_dose}\nStatus: {self.status}"
+        data = f"Nom: {self.patient.nom} {self.patient.prenom}\nCenter: {self.center.nom}\nMoughataa: {self.center.moughataa}\nType vaccine: {self.vaccine.type.nom}\nVaccine: {self.vaccine.nom}\nTotal doses: {self.dose_number}\nDoses administré: {self.dose_administre}\nDate darnier dose: {self.date_darnier_dose}\nStatus: {self.status}"
 
         # Generate QR code image
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
@@ -218,26 +214,6 @@ class Vaccination(models.Model):
     def __str__(self):
         return f'{self.patient.nom}-{self.vaccine.type.nom}-{self.vaccine.nom}'
 
-@receiver(pre_save, sender=Vaccination)
-def changeStatus(sender, instance,*args, **kwargs):
-    if instance.dose_administré == instance.dose_number:
-        instance.status = 'validé'
-        data = f"Nom: {instance.patient.nom} {instance.patient.prenom}\nCenter: {instance.center.nom}\nMoughataa: {instance.center.moughataa}\nType vaccine: {instance.vaccine.type.nom}\nVaccine: {instance.vaccine.nom}\nTotal doses: {instance.dose_number}\nDoses administré: {instance.dose_administré}\nDate darnier dose: {instance.date_darnier_dose}\nStatus: {instance.status}"
-
-        générer_certificat_vaccination(instance)
-
-        # Generate QR code image
-        qr = qrcode.QRCode(version=1, box_size=10, border=5)
-        qr.add_data(data)
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="black", back_color="white")
-
-        # Save QR code image to field
-        buffer = BytesIO()
-        img.save(buffer, format='PNG')
-        instance.qr_code.save(f"{instance.patient.nom}-vaccination-qr-code.png", File(buffer), save=False)
-
-        
         
 class Vaccin_Dose(models.Model):
     vaccination = models.ForeignKey(Vaccination, on_delete=models.CASCADE)
@@ -248,25 +224,15 @@ class Vaccin_Dose(models.Model):
         return f'{self.patient.nom} {self.vaccin.nom}'
 
 
-@receiver(post_save, sender=Vaccination)
-def SaveDose(sender, instance, created, **kwargs):  
-    if created:
-        Vaccin_Dose.objects.create(
-            vaccination=instance,
-            patient=instance.patient,
-            vaccin=instance.vaccine       
-        )
-    # if instance.dose_administré == instance.dose_number:
-    #     générer_certificat_vaccination(instance)
-        
 
-# #-----------------certificat-----------------#
+#-----------------certificat-----------------#
 class CertificatVaccination(models.Model):
     id_certificat = models.CharField(max_length=10, unique=True)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     vaccin = models.ForeignKey(Vaccine, on_delete=models.CASCADE)
     date_delivration = models.DateField()
     valide = models.BooleanField(default=False)
+    # vaccination = models.ForeignKey(Vaccination, on_delete=models.CASCADE)
     qr_code = models.ImageField(upload_to='vaccination_qr_codes/', blank=True, null=True)
 
     def save(self, *args, **kwargs):
@@ -290,26 +256,53 @@ class CertificatVaccination(models.Model):
     def __str__(self):
         return f'{self.patient.nom} {self.id_certificat}'
 
-
-#foctions
+import random
 
 def générer_id_certificat():
     hex_chars = '0123456789ABCDEF'
     return ''.join(random.choice(hex_chars) for _ in range(10))
 
-
+from datetime import date
 def générer_certificat_vaccination(vaccination):
     patient = vaccination.patient
     vaccin = vaccination.vaccine
 
-    if vaccination.dose_administré == vaccin.total_doses:     
+    if vaccination.dose_administre == vaccin.total_doses:     
         certificat = CertificatVaccination.objects.create(
             id_certificat=générer_id_certificat(),
             patient=patient,
             vaccin=vaccin,
             date_delivration= date.today(),
             valide=True,
-
+            # vaccination=vaccination
         )
 
+
+
+#-----------planification-----------#
+class ProchaineDose(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    vaccin = models.ForeignKey(Vaccine, on_delete=models.CASCADE)
+    date_vaccination = models.DateField()
+    nombre_doses = models.IntegerField(default=2) 
+
+    def __str__(self):
+        return f'{self.patient.nom} {self.nombre_doses}'
+
+
+from datetime import timedelta
+def planifier_prochaines_doses(vaccination):
+    date_vaccination = vaccination.date_darnier_dose
+    nombre_doses_total = Dose.objects.filter(vaccine=vaccination.vaccine)  # Utiliser le champ nombre_doses
+
+    for i in nombre_doses_total:
+        print(i.duree)
+        prochaine_dose = date_vaccination + timedelta(days=i.duree)
+  
         
+        notification_date = prochaine_dose - timedelta(days=3)  # Date de la notification, 3 jours avant la dose
+
+        prochaine_dose = ProchaineDose(patient=vaccination.patient, vaccin=vaccination.vaccine, date_vaccination=prochaine_dose, nombre_doses=i.number + 1)
+        prochaine_dose.save()
+
+        # planifier_notification_prochaine_dose(vaccination.patient, notification_date)

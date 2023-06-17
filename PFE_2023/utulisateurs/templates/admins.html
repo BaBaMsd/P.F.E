@@ -1,0 +1,41 @@
+{% extends 'main_app/base.html' %}
+
+{% block content %}
+<div class="container"> 
+  <h3>Utilisateurs</h3>
+  <a type="button" href="{% url 'add_staff' %}" class="btn btn-primary my-2">Nouveau-utilisateur</a>
+  <div class="card">
+    <div class="card-header">
+    </div>
+    <div class="card-body">
+      <table class="table table-bordered" id="stockTable">
+        <thead>
+          <tr>
+            <th scope="col">N°</th>
+            <th scope="col">Email</th>
+            <th scope="col">Numéro tel</th>
+            <th scope="col">Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in admins %}
+            {% if i.user.role != 'responsable-center' %}
+                <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ i.user.email}}</td>
+                <td>{{ i.user.phone_number }}</td>
+                <td>{{ i.user.role }}</td>
+                <td><a href="{% url 'sup_user' i.id  %}" class="btn btn-danger" onclick="return confirm('Etes vous sur de spprimmer ce Utilisateur')"><center>spprimmer</center></a></td>
+
+                </tr>
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock %}

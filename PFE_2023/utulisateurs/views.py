@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 from django.shortcuts import render
 from django.db.models import Sum
-from utulisateurs.utils import check_stock
+from utulisateurs.utils import *
 from django.db.models import Count
 from datetime import date
 from django.shortcuts import render, redirect
@@ -22,17 +22,28 @@ from django.core.validators import RegexValidator
 def addCenterForm(request):
     if request.method == 'POST':
         form = AddCenterForm(request.POST)
+
         if form.is_valid():
+            ph = form.cleaned_data['phone_number']
+            if User.objects.filter(phone_number=ph).exists():
+                messages.error(request,'Ce numéro téléphone est existe deja !')
+                return redirect('addCenterForm')
             form.save()
+            messages.success(request,'un nouveau centre ajouter avec seccess')
+            return redirect('addCenterForm')
+        else:
+            messages.error(request,'Les donnes ne sont pas correct')
             return redirect('addCenterForm')
 
     else:
+
         form = AddCenterForm()
 
     return render(request, 'addCenterForm.html', {'form': form})
 
 @login_required
 def ac(request):
+    abondant()
     type_vaccination = TypeVaccination.objects.all()
     if type_vaccination.exists():
         idtp = type_vaccination[0].id  
@@ -43,12 +54,24 @@ def ac(request):
 
 @login_required
 def accueil(request, id):
+    abondant()
     type_v = TypeVaccination.objects.get(id=id)
     if request.user.role == 'responsable-center' or request.user.role == 'gerent-stock' or request.user.role == 'professionnel':
         centre = AdminCenter.objects.get(user=request.user)
         vaccinations = Vaccination.objects.filter(center=centre.center, vaccine__type=type_v)
+        patients = 0
+        for i in vaccinations:
+            patients += 1
+
+        total_patient = patients
     else:
-        vaccinations = Vaccination.objects.filter(vaccine__type=type_v)
+        vaccinations = Vaccination.objects.all()
+
+        patients = 0
+        for i in vaccinations:
+            patients += 1
+
+        total_patient = patients
 
     # Compter les vaccinations par etat
     status_counts = {}
@@ -110,15 +133,15 @@ def accueil(request, id):
         else:
             age_counts['50+'] += 1
 
-    patients = Patient.objects.all()
-    total_patient = patients.count()
-    sex_count1 = patients.values('sexe').annotate(count=Count('sexe'))
-    sex_percentages = {}
-    for sex_count in sex_count1:
-        sex_percentages[sex_count['sexe']] = round(sex_count['count'] / total_patient * 100)
+    
+    
+    # sex_count1 = patients.values('sexe').annotate(count=Count('sexe'))
+    # sex_percentages = {}
+    # for sex_count in sex_count1:
+    #     sex_percentages[sex_count['sexe']] = round(sex_count['count'] / total_patient * 100)
 
     sex_counts = {}
-    sex_labels = ['Femme', 'Homme']
+    sex_labels = ['femme', 'homme']
     for label in sex_labels:
         sex_counts[label] = vaccinations.filter(patient__sexe=label).count()
     
@@ -148,7 +171,7 @@ def accueil(request, id):
         'centre_counts': centre_counts,
         'age_counts': age_counts,
         'sex_counts': sex_counts,
-        'sex_percentages': sex_percentages, 
+        # 'sex_percentages': sex_percentages, 
         'total_patient': total_patient,
         'type_v': type_v,
         'type_vs': type_vs,
@@ -223,14 +246,20 @@ def add_vaccine(request):
         #'formset': formset,
     }
     return render(request, 'add_vaccine.html', context)
-
+@login_required
 def delete_vaccination_type(request, id):
     type_vac = TypeVaccination.objects.get(id=id)
     type_vac.delete()
     messages.success(request, 'Un type de vaccination a ete supprimee avec succès')
     return redirect(reverse('vaccination_type'))
-    
+@login_required
+def sup_user(request, id):
+    user = User.objects.get(id=id)
+    user.delete()
+    messages.success(request, 'Un utilisateur a été supprimee avec succès')
+    return redirect(reverse('list_emp')) 
 
+@login_required
 def delete_vaccine(request, id):
     vaccine = Vaccine.objects.get(id=id)
     vaccine.delete()
@@ -261,6 +290,21 @@ def stockAddition(request):
         form = StockForm()
 
     return render(request, 'stock/stockage.html', {'stockf': form})
+
+@login_required
+@user_passes_test(lambda u: u.role in ['responsable-center', 'gerent-stock'])
+
+def list_emp(request):
+    ad = AdminCenter.objects.get(user=request.user)
+    admins= AdminCenter.objects.filter(center=ad.center)
+
+    contex = {
+        'admins': admins
+    }
+
+    return render(request, 'admins.html', contex)
+
+
 
 @login_required
 @user_passes_test(lambda u: u.role in ['responsable-center', 'gerent-stock'])
@@ -323,7 +367,7 @@ def stockSuppresion(request):
 @user_passes_test(lambda u: u.role in ['responsable-center', 'gerent-stock'])
 def stock_center(request):
     centerAdmin = AdminCenter.objects.get(user=request.user)
-    center = CentreDeVaccination.objects.get(id=centerAdmin.center.id)
+    center = CentreDeVaccination.objects.get(id=centerAdmin.center.id )
 
     check_stock(request,centre=center)
     stock_data = StockVaccins.objects.filter(centerVaccination=center).select_related('vaccine').values('vaccine__nom').annotate(total_quantite=Sum('quantite'))
@@ -379,12 +423,12 @@ def choix_vaccination(request):
 
 @login_required
 @user_passes_test(lambda u: u.role in ['responsable-center', 'professionnel'])
-def add_vaccination(request, id):
+def add_vaccination(request):
     if request.method == 'POST':
         centerAdmin = AdminCenter.objects.get(user=request.user)
         center = CentreDeVaccination.objects.get(id=centerAdmin.center.id)
         vaccine = Vaccine.objects.get(id=request.POST['vaccine'])
-        if vaccine.type.sexe_cible != request.POST['sexe']:
+        if vaccine.type.sexe_cible != request.POST['sexe'] and vaccine.type.sexe_cible != 'tous':
                 messages.error(request, f'Cette vaccination est specifique pour: {vaccine.type.sexe_cible}')       
                 return redirect('add_vaccination')
         if Vaccination.objects.filter(patient__nni=request.POST['nni'],vaccine__type=vaccine.type).exists():
@@ -403,10 +447,10 @@ def add_vaccination(request, id):
             stockage = StockVaccins.objects.filter(vaccine=vaccine,
             centerVaccination=center,
             dateExpiration__gte=datetime.today(),
-            quantite__gte=vaccine.doses_administrees 
+            quantite__gte=vaccine.doses_administrées 
             ).order_by('dateExpiration').first()
             if stockage:
-                stockage.quantite = stockage.quantite - vaccine.doses_administrees
+                stockage.quantite = stockage.quantite - vaccine.doses_administrées
                 stockage.save()
                 vaccination.save()
                 # certificat = Vaccination.objects.get(patient=patient)
@@ -453,11 +497,11 @@ def add_vaccination(request, id):
                 vaccine=vaccine,
                 centerVaccination=center,
                 dateExpiration__gte=datetime.today(),
-                quantite__gte=vaccine.doses_administrees
+                quantite__gte=vaccine.doses_administrées
             ).order_by('dateExpiration').first()
 
             if stockage:
-                stockage.quantite = stockage.quantite - vaccine.doses_administrees
+                stockage.quantite = stockage.quantite - vaccine.doses_administrées
                 stockage.save()
                 patient.save()
                 vaccination_p.patient = patient
@@ -477,16 +521,17 @@ def add_vaccination(request, id):
             else:
                 messages.error(request, 'Quantite insuffisante en stock pour vacciner.')
      
-    tp = TypeVaccination.objects.get(id=id)
+    # tp = TypeVaccination.objects.get(id=id)
     centerAdmin = AdminCenter.objects.get(user=request.user)
     center = CentreDeVaccination.objects.get(id=centerAdmin.center.id)
-    stock_data = StockVaccins.objects.filter(centerVaccination=center, vaccine__type=tp).distinct('vaccine')
+    stock_data = StockVaccins.objects.filter(centerVaccination=center)
+    # .distinct('vaccine')
 
-    tps = TypeVaccination.objects.all()
+    # tps = TypeVaccination.objects.all()
 
     context = {
-        'tps': tps,
-        'tp': tp,
+        # 'tps': tps,
+        # 'tp': tp,
         'stock_data':stock_data
     }
     return render(request, 'vaccination/vaccinationForm.html', context)
@@ -502,6 +547,7 @@ def vaccins(request):
             patien = Patient.objects.get(nni=nni)   
             vaccins = Vaccination.objects.filter(patient=patien)
             context = {
+                'patient':patien,
                 'vaccins': vaccins
             }
             return render(request, 'vaccination/patient_vaccins.html', context)
@@ -528,6 +574,9 @@ def vaccination_complementaire(request, id):
     #         if i.number == vac.dose_administre and i.duree > vac.date_darnier_dose - date.today():
     #             messages.error(request, 'Imposible de prendre ce dose avant que le duree est fini')
     #             return redirect('vaccination_complementaire')
+    if vac.dose_administre == vac.vaccine.total_doses:
+        messages.error(request, 'Les doses sont termine')
+        return redirect('vaccins')
     admin = AdminCenter.objects.get(user=request.user)
     center=admin.center
     vac.dose_administre += 1    
@@ -573,7 +622,17 @@ def add_staff(request):
     if request.method == 'POST':
         form = Add_staff(request.POST)
         if form.is_valid():
+            ph = form.cleaned_data['phone_number']
+            email = form.cleaned_data['email']
+            role = form.cleaned_data['role']
+            if User.objects.filter(phone_number=ph).exists():
+                messages.error(request,'Ce numéro téléphone est existe deja !')
+                return redirect('add_staff')
+            if User.objects.filter(email=email).exists():
+                messages.error(request,'Ce Email téléphone est existe deja !')
+                return redirect('add_staff')
             form.save(commit=False,request=request)
+            messages.success(request,f'Un nouveau {role} est ajouter')
             return redirect('add_staff')
     else:
         form = Add_staff()

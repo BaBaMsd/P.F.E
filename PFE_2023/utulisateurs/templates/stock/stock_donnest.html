@@ -3,8 +3,17 @@
 {% block content %}
 
 <div class="container">
-    <h1>L'etat de stock </h1>
-    <div class="row my-5">
+  <div class="my-2">
+    <a href="{% url 'stock_center' %}" type="button" class="btn btn-success">Actuel</a>
+    <a href="{% url 'stockAddition' %}" type="button" class="btn btn-success">Entrant</a>
+    <a href="{% url 'stockSuppresion' %}" type="button" class="btn btn-success">Sortent</a>
+    {% if request.user.role == 'responsable-center' %}
+    <a href="{% url 'historique_stock' %}" type="button" class="btn btn-success">Historique</a>
+    {% endif %}
+    
+    </div>
+    <h3>L'etat de stock </h3>
+    <div class="row my-3">
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">

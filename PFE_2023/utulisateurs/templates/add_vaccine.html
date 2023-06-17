@@ -2,27 +2,52 @@
 {% load crispy_forms_tags %}
 {% block content %}
 <div class="container">
+    <div class="my-2">
+        <a href="{% url 'add_vaccine' %}"" type="button" class="btn btn-success">Nouveau-vaccin</a>
+        <a href="{% url 'liste_vaccine' %}" type="button" class="btn btn-success">Vaccins-list</a>
+      </div>
     {% if vaccine_form %}
-    <form method="POST">
-        {% csrf_token %}
-        {{ vaccine_form.as_p }}
-        <button class="btn btn-outline-info" type="submit">Ajouter vaccine</button>
-    </form>
+    <div class="row  py-2">
+                <div class="col-md-6">
+                    <div class="">
+                        <div class="card mt-3">     
+                            <div class="card-body">
+                                <h3>Nouveau vaccin</h3>
+                                <form method="POST">
+                                    {% csrf_token %}
+                                    {{ vaccine_form.as_p }}
+                                    <button class="btn btn-primary" type="submit">Ajouter vaccin</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
     {% elif formset %}
-        <form method="post">
-            {% csrf_token %}
-            {{ formset.management_form }}
-           
-                {% for form in formset %}
-                <tr>
-                    <p>durée du dose numéro: {{ forloop.counter }}</p>
-                    <td>{{ form.as_p }}</td>
-                
-                </tr>
-                {% endfor %}
-            </table>
-            <button class="btn btn-outline-info" type="submit">Enregistrer</button>
-        </form>
+    <div class="col-md-6">
+        <div class="">
+            <div class="card mt-3">
+              
+                <div class="card-body">
+                    <h3>Duree des doses du vaccin</h3>
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ formset.management_form }}
+                    
+                            {% for form in formset %}
+                            <tr>
+                                <p>durée du dose numéro: {{ forloop.counter }}</p>
+                                <td>{{ form.duree }}</td>
+                            
+                            </tr>
+                            {% endfor %}
+                            <br>
+                        <button class="btn btn-primary" type="submit">Enregistrer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
         {% else %}
         <p>HHHHHHHHHHHHHHHh</p>
     {% endif %}

@@ -2,17 +2,27 @@
 {% load crispy_forms_tags %}
 {% load static %}
 {% block content %}
-    <div class="container">
+    <div class="container py-3">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="">
+                    <div class="card mt-3">
+                        <div class="card-body">
         <form method="POST">
             {% csrf_token %}
             <fieldset class="form-group">
-                <img src="{% static 'OIP.jpg' %}" alt="logoVaccin" style="margin-left: 150px;" />
+                <img src="{% static 'logo.png' %}" alt="logoVaccin" style="margin-left: 155px; width: 200px; height:150px;" />
                 {{ form.as_p }}
             </fieldset>
             <div class="form-group">
-                <button class="btn btn-outline-info" type="submit">Connecter</button>
+                <center><button class="btn btn-primary" type="submit">Connecter</button></center>
             </div>
         </form> 
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
     </div>
     {% block custom_js %}
     <script src="{% static 'js/hide-message.js' %}"></script>

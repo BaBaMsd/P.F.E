@@ -6,7 +6,7 @@
  <div class="py-3 px-3">
     <div class="py-1">
         <button id="print-button" onclick="window.print();" class="btn btn-primary print-hide">Imprimer</button>
-        <a id="print-button1" href="{% url 'add_vaccination' cr.vaccine.type.id %}" class="btn btn-secondary print-hide">Annuler</a>
+        <a id="print-button1" href="{% url 'add_vaccination' %}" class="btn btn-secondary print-hide">Annuler</a>
 
     </div>
  </div>
@@ -43,7 +43,7 @@
                           </tr>
                           
                           <tr style="font-size: 18px;">
-                            <td>Dose: {{ cr.vaccine.total_doses}}/{{ cr.dose_administré}}</td>
+                            <td>Dose: {{ cr.vaccine.total_doses}}/{{ cr.dose_administre}}</td>
                             <td style="text-align: right;">الجرعة</td>
                           </tr>
                           <tr style="font-size: 18px;">

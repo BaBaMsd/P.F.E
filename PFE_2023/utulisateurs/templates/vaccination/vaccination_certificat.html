@@ -3,11 +3,30 @@
 
 {% block content %}
 <div class="container">
-    <h3>Certificat de vaccination</h3>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Chercher</button>
-    </form> 
+    <div class="my-2">
+    <a href="{% url 'add_vaccination' %}" type="button" class="btn btn-success">Nouvelle</a>
+    <a href="{% url 'vaccins' %}" type="button" class="btn btn-success">Complementaire</a>
+    {% if request.user.role == 'responsable-center' %}
+    <a href="{% url 'vaccination_certificat' %}" type="button" class="btn btn-success">Certificat</a>
+    {% endif %}
+    </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="">
+                    <div class="card mt-3">
+                      
+                        <div class="card-body">
+                            <h3>Certificat de vaccination</h3>
+                            <form method="POST">
+                                {% csrf_token %}
+                                {{ form.as_p }}
+                                <button type="submit" class="btn btn-primary">Chercher</button>
+                            </form> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -1,11 +1,12 @@
 {% extends "main_app/base.html" %}
 {% block content %}
-<fieldset>
-    <h2>Vous avez déconnecter avec success </h2>
-</fieldset>  
-    <div class="border-top pt-3">
-        <small class="text-muted">
-            <a href="{% url 'login' %}" class="btn btn-primary">Connecter</a>
-        </small>
+<div class="card mt-3">
+    <div class="card-header">
+        <h5>Vous avez déconnecter avec success</h5>
+        <p></p>
     </div>
+    <div class="card-body">
+        <center><a href="{% url 'login' %}" class="btn btn-primary">Connecter</a></center>
+    </div>
+</div>
 {% endblock content %}

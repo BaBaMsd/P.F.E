@@ -4,16 +4,24 @@
 {% block content %}
 
 <div class="container ">
+    <div class="container">
+        <div class="my-2">
+          <a href="{% url 'addCenterForm' %}"" type="button" class="btn btn-success">Nouveau-centre</a>
+          <a href="{% url 'centres' %}" type="button" class="btn btn-success">Centres-list</a>
+    </div>
     <div class="row">
         <div class="col-sm-6">
-            <h1>Nouveau center</h1>
+            <div class="card mt-3">
+                <div class="card-body">
             <form method=POST>
-                {% csrf_token %}
+                {% csrf_token %} 
                 {{ form.as_p }}
-                <button type="submit" class="btn btn-outline-info mb-4">Ajouter</button>
+                <button type="submit" class="btn btn-primary mb-4">Ajouter</button>
             </form> 
+            </div>
+            </div>
         </div>
-        <div id="mapid" style="height: 500px;" class="col-md-6 my-4"></div><br>
+        <div id="mapid" style="height: 600px;" class="col-md-6 my-4"></div><br>
 
     </div>
 

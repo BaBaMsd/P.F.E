@@ -3,10 +3,31 @@
 {% load static %}
 {% block content %}
     <div class="container">
-        <form method="POST">
-            {% csrf_token %}
-            {{ stockf.as_p }}
-            <button class="btn btn-outline-info" type="submit">Ajouter</button>
-        </form>
+        <div class="my-2">
+            <a href="{% url 'stock_center' %}" type="button" class="btn btn-success">Actuel</a>
+            <a href="{% url 'stockAddition' %}" type="button" class="btn btn-success">Entrant</a>
+            <a href="{% url 'stockSuppresion' %}" type="button" class="btn btn-success">Sortent</a>
+            {% if request.user.role == 'responsable-center' %}
+            <a href="{% url 'historique_stock' %}" type="button" class="btn btn-success">Historique</a>
+            {% endif %}
+    
+        </div>
+        <div class="row  py-2">
+            <div class="col-md-6">
+                <div class="">
+                    <div class="card mt-3">
+                      
+                        <div class="card-body">
+                            <form method="POST">
+                                {% csrf_token %}
+                                {{ stockf.as_p }}
+                                <button class="btn btn-primary" type="submit">Ajouter</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
 {% endblock %}

@@ -21,7 +21,7 @@ def login(request):
             if user.role == 'gerent-stock':
                 return redirect('stock_center')
             if user.role == 'professionnel':
-                return redirect('choix_vaccination')
+                return redirect('vaccination_certificat')
             return redirect('ac')
         else:
             messages.error(request, 'Email ou mot pass invalid ')
@@ -45,12 +45,10 @@ def register(request):
 @login_required
 def profile(request):
     if request.method == 'POST':
-        u_form = UserUpdateForm(request.POST, instance=request.user)
         p_form = ProfileUpdateForm(request.POST,
                                    request.FILES,
                                    instance=request.user.profile)
-        if u_form.is_valid() and p_form.is_valid():
-            u_form.save()
+        if p_form.is_valid():
             p_form.save()
             messages.success(request, f'Votre profile est modifier ')
             return redirect('profile')
@@ -58,11 +56,9 @@ def profile(request):
             messages.error(request, f'il y a une erreur ')
             return redirect('profile')
     else:
-        u_form = UserUpdateForm(instance=request.user)
         p_form = ProfileUpdateForm(instance=request.user.profile)
 
     context = {
-        'u_form': u_form,
         'p_form': p_form
     }
 
