@@ -3,7 +3,7 @@ from utulisateurs.serializers import  CentreSerializer, PatientSerializer
 from utulisateurs.models import *
 from django.contrib.auth import get_user_model
 
-from utulisateurs.views import centres
+# from utulisateurs.views import centres
 User = get_user_model()
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.response import Response
@@ -64,7 +64,7 @@ def register_patient(request):
     else:
         
         return Response('ERRROR', status=400)
-
+#-----------donnes----------#
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUserData(request,id):
@@ -88,7 +88,7 @@ def getUserData(request,id):
         }
         return Response(user_data,status = 200)
 
-
+#-----------------centres-------------#
 @api_view(['GET'])
 def getCentres(request):
     if request.method == 'GET':
@@ -126,7 +126,7 @@ def userData(request,id):
 
 
 
-
+#------------refrech-----------#
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def refreshToken(request):

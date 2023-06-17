@@ -3,11 +3,21 @@
 
 {% block content %}
 <div class="container">
-    <h1>Nouveau-Utilisateur</h1>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-outline-info mb-4">Enregister</button>
-    </form> 
+    <a type="button" href="{% url 'list_emp' %}" class="btn btn-success my-2">list-utilisateurs</a>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="">
+                <div class="card mt-3">
+                    <div class="card-body">
+                    <h3>Nouveau-Utilisateur</h3>
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary mb-4">Enregister</button>
+                    </form> 
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -2,10 +2,16 @@
 
 {% block content %}
     <div class="container">
+      <div class="my-2">
+        <a href="{% url 'addCenterForm' %}"" type="button" class="btn btn-success">Nouveau-centre</a>
+        <a href="{% url 'centres' %}" type="button" class="btn btn-success">Centres-list</a>
+        </div>
+      <h2>Liste des Centres</h2>
+      <!-- <a href="{% url 'addCenterForm' %}" class="btn btn-primary my-1">Nouveau centre</a> -->
+      
         <div class="row">
           <div class="col-md-12">
-            <h2 class="text-center">Carte des centres de vaccination</h2>
-            <div id="mapid" style="height: 400px;"></div>
+            <div id="mapid" style="height: 500px;"></div>
             <!-- style="height: 400px;" -->
           </div>
           <!-- <div class="col-md-6">

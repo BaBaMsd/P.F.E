@@ -1,0 +1,45 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Ajoutez les styles personnalisés pour le navbar */
+
+.navbar {
+  background-color: #34D399;
+}
+
+.navbar a {
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.navbar a:hover {
+  color: #D1FAE5;
+}
+
+.navbar .dropdown-button {
+  color: #fff;
+}
+
+.navbar .dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar .dropdown-menu a {
+  display: block;
+  padding: 0.5rem 1rem;
+  color: #333;
+}
+
+.navbar .dropdown-menu a:hover {
+  background-color: #EDF2F7;
+}
+
+/* Ajoutez d'autres styles personnalisés selon vos besoins */

@@ -3,14 +3,34 @@
 
 {% block content %}
 <div class="container">
-    <h5>Vaccination-complementaire</h5>
-    <form method="POST">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="nni">N.N.I</label>
-            <input type="number" class="form-control input-group mb-3 col-6" id="nni" name="nni" required>
-          </div>
-        <button type="submit" class="btn btn-outline-info mb-4">Chercher</button>
-    </form> 
+    <div class="my-2">
+        <a href="{% url 'add_vaccination' %}" type="button" class="btn btn-success">Nouvelle</a>
+        <a href="{% url 'vaccins' %}" type="button" class="btn btn-success">Complementaire</a>
+        {% if request.user.role == 'responsable-center' %}
+        <a href="{% url 'vaccination_certificat' %}" type="button" class="btn btn-success">Certificat</a>
+        {% endif %}
+        </div>
+            <div class="row  py-2">
+                <div class="col-md-6">
+                    <div class="">
+                        <div class="card mt-3">
+                          
+                            <div class="card-body">
+                                <h3>Vaccination-complementaire</h3>
+                                <form method="POST">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="nni">N.N.I</label>
+                                        <input type="number" class="form-control input-group mb-3 col-md-12" ',
+                                        style='border-color: #888888;' id="nni" name="nni" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Chercher</button>
+                                </form> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 </div>
 {% endblock %}
