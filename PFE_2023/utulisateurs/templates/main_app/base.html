@@ -47,7 +47,7 @@
     <div class="wrapper">
 
         <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-white">
             <div class="container">
               <a class="navbar-brand" href="#"><img src="{% static 'logo.png' %} "  alt="Logo" class="logo-image" style="width: 60px;height: 48px;" height: auto;"></a>
               <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,19 +57,19 @@
                 <ul class="navbar-nav ml-auto">
                 {% if request.user.is_superuser %}
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'ac' %}">Accueil</a>
+                    <a style="color: green;" class="nav-link" href="{% url 'ac' %}">Accueil</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'centres' %}">Centres</a>
+                    <a style="color: green;" class="nav-link" href="{% url 'centres' %}">Centres</a>
                   </li>
                   <li class="nav-item ">
-                    <a class="nav-link" href="{% url 'liste_vaccine' %}">Vaccins</a>
+                    <a style="color: green;" class="nav-link" href="{% url 'liste_vaccine' %}">Vaccins</a>
                   </li>
                   <li class="nav-item ">
-                    <a class="nav-link" href="{% url 'vaccination_type' %}">Vaccinatins-type</a>
+                    <a style="color: green;" class="nav-link" href="{% url 'vaccination_type' %}">Vaccinatins-type</a>
                   </li>
                   <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="dropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a style="color: green;" class="nav-link dropdown-toggle" href="#" id="dropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                       Admin
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdown1">
@@ -80,19 +80,19 @@
                   </li>
                   {% elif request.user.role == 'responsable-center' %}
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'ac' %}">Accueil</a>
+                    <a style="color: green;" class="nav-link" href="{% url 'ac' %}">Accueil</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'add_vaccination' %}">Vaccination</a>
+                    <a style="color: green;" class="nav-link" href="{% url 'add_vaccination' %}">Vaccination</a>
                   </li>
                   <li class="nav-item ">
-                    <a class="nav-link" href="{% url 'stock_center' %}">Stock</a>
+                    <a style="color: green;" class="nav-link" href="{% url 'stock_center' %}">Stock</a>
                   </li>
                   <li class="nav-item ">
-                    <a class="nav-link" href="{% url 'list_emp' %}">Employée</a>
+                    <a style="color: green;" class="nav-link" href="{% url 'list_emp' %}">Employée</a>
                   </li>
                   <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="dropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a style="color: green;" class="nav-link dropdown-toggle" href="#" id="dropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                       Admin-centre
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdown1">
@@ -103,28 +103,28 @@
                   </li>
                   {% elif request.user.role == 'gerent-stock' %}
                   <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="dropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a style="color: green;" class="nav-link dropdown-toggle" href="#" id="dropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                       Gestionner stock
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdown1">
-                      <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
-                        <li> <a class="dropdown-item" href="{% url 'logout' %}">Déconnexion</a></li>
+                      <li><a style="color: green;" class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
+                        <li> <a style="color: green;" class="dropdown-item" href="{% url 'logout' %}">Déconnexion</a></li>
             
                     </ul>
                   </li>
                   {% elif request.user.role == 'professionnel' %}
                   <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="dropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a style="color: green;" class="nav-link dropdown-toggle" href="#" id="dropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Professionnel sente
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdown1">
-                      <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
+                      <li><a class="dropdown-item" href="{% url 'profile' %}" style="color: green;">Profile</a></li>
                         <li> <a class="dropdown-item" href="{% url 'logout' %}">Déconnexion</a></li>
             
                     </ul>
                   </li>
                   {% else %}
-                  <li><p>Bienvenue dans notre application </p></li>
+                  <li><p style="color: green;">Bienvenue</p></li>
                 </ul>
                 {% endif %}
               </div>

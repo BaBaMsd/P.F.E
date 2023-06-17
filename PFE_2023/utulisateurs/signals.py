@@ -53,13 +53,23 @@ def inserer_wilayas(sender, **kwargs):
             # Ajoutez les autres wilayas avec leurs moughataa correspondants
         ]
 
+        covid = [ {
+            'nom': 'Covid-19',
+            'description':'La COVID-19 est une maladie infectieuse causée par le coronavirus qui a entraîné une pandémie mondiale.',
+            'sexe_cible': 'tous',
+            'age_minimum': '5',
+            'age_maximum': '100'
+        }]
+
         if not Wilaya.objects.exists():
             # Insérer les wilayas et les moughataa dans la base de données
             for wilaya_data in wilayas:
                 wilaya = Wilaya.objects.create(nom=wilaya_data['nom'], code=wilaya_data['code'])
                 for moughataa_nom in wilaya_data['moughataa']:
                     Moughataa.objects.create(nom=moughataa_nom, wilaya=wilaya)
-    
+                    
+        if not TypeVaccination.objects.exists():
+            type = TypeVaccination.objects.create(nom=covid['nom'],description=covid['description'],sexe_cible=covid['sexe_cible'],age_minimum=covid['age_minimum'],age_maximum=covid['age_maximum'])
 
 
 @receiver(pre_save, sender=Vaccination)

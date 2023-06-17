@@ -97,7 +97,8 @@ class AdminCenter(models.Model):
 class TypeVaccination(models.Model):
     SEXE=[
         ('homme','Homme'),
-        ('femme','Femme')
+        ('femme','Femme'),
+        ('tous', 'tous')
     ] 
     nom = models.CharField(max_length=100)
     description = models.TextField(default='')
@@ -196,7 +197,7 @@ class Vaccination(models.Model):
 
     def save(self, *args, **kwargs):
         # Generate QR code data
-        data = f"Nom: {self.patient.nom} {self.patient.prenom}\nCenter: {self.center.nom}\nMoughataa: {self.center.moughataa}\nType vaccine: {self.vaccine.type.nom}\nVaccine: {self.vaccine.nom}\nTotal doses: {self.dose_number}\nDoses administré: {self.dose_administre}\nDate darnier dose: {self.date_darnier_dose}\nStatus: {self.status}"
+        data = f"Carte vaccination: {self.vaccine.type.nom}\nNom: {self.patient.nom} {self.patient.prenom}\nDate: {self.date_darnier_dose}\nVaccin: {self.vaccine.nom}\nSite\nCenter: {self.center.nom}\nMoughataa: {self.center.moughataa}\nDose: {self.dose_administre}/{self.dose_number}"
 
         # Generate QR code image
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
