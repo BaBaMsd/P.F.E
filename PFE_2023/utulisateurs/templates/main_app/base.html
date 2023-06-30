@@ -49,7 +49,7 @@
         <!-- Navbar -->
         <nav class="navbar navbar-expand-lg navbar-dark bg-white">
             <div class="container">
-              <a class="navbar-brand" href="#"><img src="{% static 'logo.png' %} "  alt="Logo" class="logo-image" style="width: 60px;height: 48px;" height: auto;"></a>
+              <a class="navbar-brand" href="#"><img src="{% static 'logo.png' %} "  alt="Logo" class="logo-image" style="width: 55px;height: 48px;" height: auto;"></a>
               <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
               </button>
@@ -104,7 +104,7 @@
                   {% elif request.user.role == 'gerent-stock' %}
                   <li class="nav-item dropdown">
                     <a style="color: green;" class="nav-link dropdown-toggle" href="#" id="dropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      Gestionner stock
+                      Gestionnaire de stock
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdown1">
                       <li><a style="color: green;" class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
@@ -115,7 +115,7 @@
                   {% elif request.user.role == 'professionnel' %}
                   <li class="nav-item dropdown">
                     <a style="color: green;" class="nav-link dropdown-toggle" href="#" id="dropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Professionnel sente
+                        Professionnel santé
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdown1">
                       <li><a class="dropdown-item" href="{% url 'profile' %}" style="color: green;">Profile</a></li>

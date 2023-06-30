@@ -156,27 +156,48 @@ def accueil(request, id):
 
     type_vs = TypeVaccination.objects.all()
 
-    # Passer les donnees aux templates
-    context = {
-        'status_counts': status_counts,
-        'vaccine_counts': vaccine_counts,
-        'vaccinations_by_moughataa': vaccinations_by_moughataa,
-        'wilaya_counts': wilaya_counts,
-        'status_labels': status_labels,
-        'status_values': status_values,
-        'wilaya_labels': wilaya_labels,
-        'wilaya_values': wilaya_values,
-        'vaccine_labels': vaccine_labels,
-        'vaccine_values': vaccine_values,
-        'centre_counts': centre_counts,
-        'age_counts': age_counts,
-        'sex_counts': sex_counts,
-        # 'sex_percentages': sex_percentages, 
-        'total_patient': total_patient,
-        'type_v': type_v,
-        'type_vs': type_vs,
-    }
-
+    if request.user.role == 'responsable-center':
+        
+         context = {
+            'status_counts': status_counts,
+            'vaccine_counts': vaccine_counts,
+            'vaccinations_by_moughataa': vaccinations_by_moughataa,
+            'wilaya_counts': wilaya_counts,
+            'status_labels': status_labels,
+            'status_values': status_values,
+            'wilaya_labels': wilaya_labels,
+            'wilaya_values': wilaya_values,
+            'vaccine_labels': vaccine_labels,
+            'vaccine_values': vaccine_values,
+            'centre_counts': centre_counts,
+            'age_counts': age_counts,
+            'sex_counts': sex_counts,
+            # 'sex_percentages': sex_percentages, 
+            'total_patient': total_patient,
+            'type_v': type_v,
+            'type_vs': type_vs,
+            'centre': centre
+        }
+    else:
+        context = {
+            'status_counts': status_counts,
+            'vaccine_counts': vaccine_counts,
+            'vaccinations_by_moughataa': vaccinations_by_moughataa,
+            'wilaya_counts': wilaya_counts,
+            'status_labels': status_labels,
+            'status_values': status_values,
+            'wilaya_labels': wilaya_labels,
+            'wilaya_values': wilaya_values,
+            'vaccine_labels': vaccine_labels,
+            'vaccine_values': vaccine_values,
+            'centre_counts': centre_counts,
+            'age_counts': age_counts,
+            'sex_counts': sex_counts,
+            # 'sex_percentages': sex_percentages, 
+            'total_patient': total_patient,
+            'type_v': type_v,
+            'type_vs': type_vs
+        }
     return render(request, 'accueil.html',context)
 
 
@@ -219,7 +240,7 @@ def add_vaccine(request):
             vaccine = vaccine_form.save()
             doses_number = vaccine_form.cleaned_data['total_doses']
             if doses_number == 1:
-                messages.success(request, 'La vaccin a bien ajouter')
+                messages.success(request, 'Le vaccin a été ajouté avec succès')
                 return redirect('add_vaccine')
 
             DoseFormSet = forms.inlineformset_factory(Vaccine, Dose, form=DoseForm, extra=doses_number - 2, min_num=1)
@@ -250,7 +271,7 @@ def add_vaccine(request):
 def delete_vaccination_type(request, id):
     type_vac = TypeVaccination.objects.get(id=id)
     type_vac.delete()
-    messages.success(request, 'Un type de vaccination a ete supprimee avec succès')
+    messages.success(request, 'Un type de vaccination a éte supprimé avec succès')
     return redirect(reverse('vaccination_type'))
 @login_required
 def sup_user(request, id):
@@ -524,8 +545,7 @@ def add_vaccination(request):
     # tp = TypeVaccination.objects.get(id=id)
     centerAdmin = AdminCenter.objects.get(user=request.user)
     center = CentreDeVaccination.objects.get(id=centerAdmin.center.id)
-    stock_data = StockVaccins.objects.filter(centerVaccination=center)
-    # .distinct('vaccine')
+    stock_data = StockVaccins.objects.filter(centerVaccination=center).distinct('vaccine')
 
     # tps = TypeVaccination.objects.all()
 
@@ -626,13 +646,13 @@ def add_staff(request):
             email = form.cleaned_data['email']
             role = form.cleaned_data['role']
             if User.objects.filter(phone_number=ph).exists():
-                messages.error(request,'Ce numéro téléphone est existe deja !')
+                messages.error(request,'Ce numéro téléphone est existe déjà !')
                 return redirect('add_staff')
             if User.objects.filter(email=email).exists():
-                messages.error(request,'Ce Email téléphone est existe deja !')
+                messages.error(request,'Ce Email téléphone est existe déjà !')
                 return redirect('add_staff')
             form.save(commit=False,request=request)
-            messages.success(request,f'Un nouveau {role} est ajouter')
+            messages.success(request,f'Un nouveau {role} est ajouté')
             return redirect('add_staff')
     else:
         form = Add_staff()
@@ -667,7 +687,7 @@ def remove_stock(request, id):
     total_disponible = sum([s.quantite for s in stock])
     if quantite_a_supprimer > total_disponible:
         # Si la quantite à retirer est superieure à la quantite disponible, affiche une erreur
-        error_message = "La quantite à retirer est superieure à la quantite disponible."
+        error_message = "La quantite à retirer est superieure à la quantité disponible."
         return redirect('/')
        # return render(request, 'myapp/remove_stock.html', {'vaccination': vaccine, 'error_message': error_message})
     

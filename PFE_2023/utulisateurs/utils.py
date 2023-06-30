@@ -34,6 +34,7 @@ def check_stock(request,centre):
         recipients = [utilisateur.user.email for utilisateur in utilisateurs]
         send_mail('Notification de stock', message, 'noreply@example.com', recipients, fail_silently=True)
 from .models import *
+
 def abondant():
     vac = Vaccination.objects.all()
     dose = ProchaineDose.objects.all()

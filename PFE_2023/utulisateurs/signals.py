@@ -5,31 +5,7 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from .models import *
 
-# @receiver(post_migrate)
-# def insérer_wilayas(sender, **kwargs):
-#     if sender.name == 'utulisateurs':  
-#         wilayas = [
-#             {'nom': 'Adrar', 'code': '01'},
-#             {'nom': 'Assaba ', 'code': '02'},
-#             {'nom': 'Brakna', 'code': '03'},
-#             {'nom': 'Dakhlet Nouadhibou', 'code': '04'},
-#             {'nom': 'Gorgol ', 'code': '05'},
-#             {'nom': 'Guidimaka', 'code': '06'},
-#             {'nom': 'Hodh Ech Chargui', 'code': '07'},
-#             {'nom': 'Hodh El Gharbi', 'code': '08'},
-#             {'nom': 'Inchiri', 'code': '09'},
-#             {'nom': 'Tagant', 'code': '10'},
-#             {'nom': 'Tiris Zemmour', 'code': '11'},
-#             {'nom': 'Trarza ', 'code': '12'},
-#             {'nom': 'Nouakchott Ouest', 'code': '13'},
-#             {'nom': 'Nouakchott Nord', 'code': '14'},
-#             {'nom': 'Nouakchott Sud', 'code': '15'},
-#         ]
 
-#         if not Wilaya.objects.exists():
-#             # Insérer les wilayas dans la base de données
-#             for wilaya_data in wilayas:
-#                 Wilaya.objects.create(nom=wilaya_data['nom'], code=wilaya_data['code'])
 
 @receiver(post_migrate)
 def inserer_wilayas(sender, **kwargs):
@@ -53,7 +29,7 @@ def inserer_wilayas(sender, **kwargs):
             # Ajoutez les autres wilayas avec leurs moughataa correspondants
         ]
 
-        covid = [ {
+        covid = [{
             'nom': 'Covid-19',
             'description':'La COVID-19 est une maladie infectieuse causée par le coronavirus qui a entraîné une pandémie mondiale.',
             'sexe_cible': 'tous',
@@ -69,7 +45,11 @@ def inserer_wilayas(sender, **kwargs):
                     Moughataa.objects.create(nom=moughataa_nom, wilaya=wilaya)
                     
         if not TypeVaccination.objects.exists():
-            type = TypeVaccination.objects.create(nom=covid['nom'],description=covid['description'],sexe_cible=covid['sexe_cible'],age_minimum=covid['age_minimum'],age_maximum=covid['age_maximum'])
+            for covid in covid:
+                type = TypeVaccination.objects.create(nom=covid['nom'],description=covid['description'],sexe_cible=covid['sexe_cible'],age_minimum=covid['age_minimum'],age_maximum=covid['age_maximum'])
+                # for moughataa_nom in wilaya_data['moughataa']:
+                #     Moughataa.objects.create(nom=moughataa_nom, wilaya=wilaya)
+            # type = TypeVaccination.objects.create(nom=covid['nom'],description=covid['description'],sexe_cible=covid['sexe_cible'],age_minimum=covid['age_minimum'],age_maximum=covid['age_maximum'])
 
 
 @receiver(pre_save, sender=Vaccination)

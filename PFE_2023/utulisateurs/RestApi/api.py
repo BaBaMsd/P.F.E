@@ -132,3 +132,38 @@ def userData(request,id):
 def refreshToken(request):
     if request.method == 'GET':
         pass
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getCertificatData(request,id):
+    if request.method == 'GET':
+        try:
+            patient = Patient.objects.get(id=id)
+            certificat = CertificatVaccination.objects.get(patient=patient)
+            
+        except CertificatVaccination.DoesNotExist:
+            return Response(status=404)
+        doses = Vaccin_Dose.objects.filter(patient=certificat.patient,vaccin=certificat.vaccin)
+
+        certificat_data = {
+        'id_certificat': certificat.id_certificat,
+        'date_delivration': certificat.date_delivration,
+        'nni': certificat.patient.nni,
+        'nom':certificat.patient.nom,
+        'prenom': certificat.patient.prenom,
+        'dateNaissance': certificat.patient.dateNaissance,
+        'vaccin': certificat.vaccin.nom,
+        'total_doses': certificat.vaccin.total_doses,
+        'doses': []
+        }
+        if doses:
+            for dose in doses:
+                dose_data = {
+                    'dose_administre': dose.vaccination.dose_administre,
+                    'date_darnier_dose': dose.vaccination.date_darnier_dose,
+                    'centre': dose.vaccination.center.moughataa.nom,
+                }
+                certificat_data['doses'].append(dose_data)
+        
+        return Response(certificat_data,status = 200)

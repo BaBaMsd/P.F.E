@@ -2,7 +2,12 @@
 
 {% block content %}
 <div class="container">
-    <center><h1>Statistiques de vaccination</h1></center>
+  {% if centre %}
+    <center><h1>Statistiques de vaccination </h1></center>
+    <center><h2>{{ centre }} </h2></center>
+  {% else %}
+    <center><h1>Statistiques de vaccination </h1></center>
+  {% endif %}
     <!-- <div class="col-md-6">
       <select class="form-select form-control input-group col-6" onchange="location = this.value;">
         <option selected>{{ type_v.nom}}</option>
@@ -31,7 +36,7 @@
   
     <!-- Graphique des vaccinations par type de vaccin -->
       <div class="col-md-6 bg-white">
-        <h3>Les vaccines utilises</h3>
+        <h3>Vaccination par type de vaccin</h3>
         <canvas id="vaccineChart"></canvas>
         <br>
         <ul class="collection">
@@ -77,7 +82,7 @@
        </div>
      </div>
      <div class="col-sm-12 bg-white">
-      <center><h4>Vaccinations par age</h4></center>
+      <center><h4>Vaccinations par tranche d'age</h4></center>
       <hr>
      <div class="row">
        <div class="col-sm-6"> 
@@ -107,12 +112,10 @@
     </div>
 {% if request.user.is_superuser %}
     <!-- Tableau des vaccinations par wilaya -->
-    <div class="row">
     
       <div class="col-sm-12 bg-white">
         <center><h3>Vaccinations par Wilaya</h3></center>
-       <div class="row">
-         <div class="col-sm-6">
+         <div class="col-sm-12">
            <!-- Tableau des vaccinations par moughataa -->
           
            <table class="table table-bordered">
@@ -133,15 +136,13 @@
            </table>
          </div>
          <div class="col-md-6">
-           <div class="bg-white">
-               <canvas id="wilayaCharte"></canvas>
-           </div>
+  
          </div>
        </div>
      </div>
         <div class="col-sm-12">
     <!-- Tableau des vaccinations par moughataa -->
-    <h5>Vaccinations par Moughataa</h5>
+    <center><h3>Vaccinations par Moughataa</h3></center> 
     <table class="table table-bordered">
       <thead>
         <tr>
@@ -161,7 +162,7 @@
 </div>
 
 <div class="col-sm-12">
-    <h5>Vaccinations par Centre</h5>
+    <center><h3>Vaccinations par Centre</h3></center>
     <table class="table table-bordered">
       <thead>
         <tr>

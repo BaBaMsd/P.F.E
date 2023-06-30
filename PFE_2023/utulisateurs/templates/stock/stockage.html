@@ -6,7 +6,7 @@
         <div class="my-2">
             <a href="{% url 'stock_center' %}" type="button" class="btn btn-success">Actuel</a>
             <a href="{% url 'stockAddition' %}" type="button" class="btn btn-success">Entrant</a>
-            <a href="{% url 'stockSuppresion' %}" type="button" class="btn btn-success">Sortent</a>
+            <a href="{% url 'stockSuppresion' %}" type="button" class="btn btn-success">Sortant</a>
             {% if request.user.role == 'responsable-center' %}
             <a href="{% url 'historique_stock' %}" type="button" class="btn btn-success">Historique</a>
             {% endif %}

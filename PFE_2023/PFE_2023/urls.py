@@ -10,15 +10,11 @@ from utulisateurs.RestApi import api
 urlpatterns = [
     path('admin/', admin.site.urls),
     # api
+    path('patient_CRT/<int:id>/',api.getCertificatData , name='patient_CRT'),
     path('patient_rg/', api.register_patient, name='patient_rg'),
     path('login_P/', api.PatientLoginView.as_view(), name='login_P'),
     path('patient_DT/<int:id>/',api.getUserData , name='patient_DT'),
-<<<<<<< HEAD
-    path('centres_rest/',api.getCentres,name='centres'),
-    path('data/<int:id>',api.userData,name='centres'),
-=======
     path('centres_rest/',api.getCentres,name='centres_rest'),
->>>>>>> 14caa0b0b87ba72679567d77223262f217fe9519
 
     #template
     path('add_staff/', add_staff, name='add_staff'),

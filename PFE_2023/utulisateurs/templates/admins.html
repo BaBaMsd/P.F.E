@@ -25,7 +25,7 @@
                 <td>{{ i.user.email}}</td>
                 <td>{{ i.user.phone_number }}</td>
                 <td>{{ i.user.role }}</td>
-                <td><a href="{% url 'sup_user' i.id  %}" class="btn btn-danger" onclick="return confirm('Etes vous sur de spprimmer ce Utilisateur')"><center>spprimmer</center></a></td>
+                <td><a href="{% url 'sup_user' i.id  %}" class="btn btn-danger" onclick="return confirm('Etes vous sur de supprimer ce Utilisateur')"><center>supprimer</center></a></td>
 
                 </tr>
             {% endif %}

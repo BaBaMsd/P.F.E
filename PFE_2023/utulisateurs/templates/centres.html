@@ -49,7 +49,7 @@
   });
 
   var infowindow{{ forloop.counter }} = new google.maps.InfoWindow({
-    content: '<b>Centre: {{ centre.nom }}</b><br>Moughataa: {{ centre.moughataa.wilaya }}<br>'
+    content: '<b>{{ centre.nom }}</b><br>{{ centre.moughataa.nom }}<br>{{ centre.moughataa.wilaya }}<br>'
   });
 
   marker{{ forloop.counter }}.addListener('click', function() {

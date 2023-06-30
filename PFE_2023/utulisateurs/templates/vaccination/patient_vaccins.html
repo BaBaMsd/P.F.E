@@ -39,7 +39,7 @@
                         {% if i.dose_number == i.dose_administre %}
                         <td></td>
                         {% else %}
-                        <td><a href="{% url 'vaccination_complementaire' i.id  %}" class="btn btn-primary">vacciné</a></td>
+                        <td><a href="{% url 'vaccination_complementaire' i.id  %}" class="btn btn-primary">Vacciner</a></td>
                         {% endif %}
                       </tr>
                     {% endfor %}

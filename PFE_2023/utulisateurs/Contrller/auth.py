@@ -21,7 +21,7 @@ def login(request):
             if user.role == 'gerent-stock':
                 return redirect('stock_center')
             if user.role == 'professionnel':
-                return redirect('vaccination_certificat')
+                return redirect('add_vaccination')
             return redirect('ac')
         else:
             messages.error(request, 'Email ou mot pass invalid ')
